@@ -19,6 +19,16 @@ class _DailyPieChart extends State<DailyPieChart> {
 
   double value = 50.0;
   Color labelColor = Colors.blue[200];
+  
+  @override
+  didUpdateWidget(oldWidget){
+    super.didUpdateWidget(oldWidget);
+    if(widget.dayRepresentation != oldWidget.dayRepresentation){
+      setState(() {
+        
+      });
+    }
+  }
 
   List<CircularStackEntry> _generateChartData(double value) {
     List<CircularStackEntry> data = <CircularStackEntry>[
@@ -42,26 +52,7 @@ class _DailyPieChart extends State<DailyPieChart> {
         ],
         rankKey: 'percentage',
       ),
-      new CircularStackEntry(
-        <CircularSegmentEntry>[
-          new CircularSegmentEntry(
-            10,
-            Colors.teal,
-            rankKey: 'completed1',
-          ),
-          new CircularSegmentEntry(
-            50,
-            Colors.green,
-            rankKey: 'remain1',
-          ),
-          new CircularSegmentEntry(
-            100,
-            Colors.grey[200],
-            rankKey: 'left',
-          )
-        ],
-        rankKey: 'percentage1',
-      ),
+      
     ];
 
     return data;
@@ -78,7 +69,7 @@ class _DailyPieChart extends State<DailyPieChart> {
     var formated =
         DateFormat('EEE d, MMMM yyyy').format(widget.dayRepresentation);
 
-    return new Container(
+    return new GestureDetector(
       child: new AnimatedCircularChart(
         key: _chartKey,
         size: _chartSize,
@@ -90,6 +81,7 @@ class _DailyPieChart extends State<DailyPieChart> {
         labelStyle: _labelStyle,
         duration: Duration(milliseconds: 1500),
       ),
+      onTap: () => print('tap'),
     );
   }
 }

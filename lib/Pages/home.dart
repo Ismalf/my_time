@@ -12,6 +12,60 @@ class MyTimeHomePage extends StatefulWidget {
 }
 
 class _MyTimeHomePageState extends State<MyTimeHomePage> {
+  List<Widget> _days = [];
+
+  /// Identifiers for a maximum of three days contained on the array
+  ///
+  static const _list = Key('days');
+  var _yesterday;
+  var _today;
+  var _tomorrow;
+  var currentIndex;
+  PageController _pageController;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _pageController = PageController(initialPage: 1);
+    currentIndex = 1;
+    _today = DateTime.now();
+    _yesterday = _today.add(Duration(days: -1));
+    _tomorrow = _today.add(Duration(days: 1));
+    var t, tom, y;
+    t = _today;
+    tom = _tomorrow;
+    y = _yesterday;
+    _days.add(
+      Container(
+        width: 400.0,
+        height: 400.0,
+        child: DailyPieChart(
+          dayRepresentation: y,
+        ),
+      ),
+    );
+    _days.add(
+      Container(
+        width: 400.0,
+        height: 400.0,
+        child: DailyPieChart(
+          dayRepresentation: t,
+        ),
+      ),
+    );
+    _days.add(
+      Container(
+        width: 400.0,
+        height: 400.0,
+        child: DailyPieChart(
+          dayRepresentation: tom,
+        ),
+      ),
+    );
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,22 +121,10 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
                 heightFactor: 400.0,
                 child: PageView(
                   scrollDirection: Axis.horizontal,
-                  children: <Widget>[
-                    Container(
-                      width: 400.0,
-                      height: 400.0,
-                      child: DailyPieChart(
-                        dayRepresentation: DateTime.now(),
-                      ),
-                    ),
-                    Container(
-                      width: 400.0,
-                      height: 400.0,
-                      child: DailyPieChart(
-                        dayRepresentation: DateTime.now(),
-                      ),
-                    ),
-                  ],
+                  key: _list,
+                  children: _days,
+                  controller: _pageController,
+                  onPageChanged: (i) => setState(() => _calculatedayslist(i)),
                 ),
               ),
             ),
@@ -100,10 +142,48 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
       ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: null,
+        onPressed: _newActivity,
         tooltip: 'Increment',
         child: Icon(Icons.add),
+        backgroundColor: Colors.white,
+        splashColor: Colors.white,
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  _newActivity() {}
+
+  _calculatedayslist(int i) {
+    print(i);
+    setState(() {
+      _today = i < currentIndex ? _yesterday : _tomorrow;
+      currentIndex = i == 0 ? 1 : i;
+      _yesterday = _today.add(Duration(days: -1));
+      _tomorrow = _today.add(Duration(days: 1));
+
+      var t, tom, y;
+      t = _today;
+      tom = _tomorrow;
+      y = _yesterday;
+      if (i == _days.length - 1) {
+        Widget w = Container(
+          width: 400.0,
+          height: 400.0,
+          child: DailyPieChart(
+            dayRepresentation: tom,
+          ),
+        );
+        _days.add(w);
+      } else if (i == 0) {
+        Widget w = Container(
+          width: 400.0,
+          height: 400.0,
+          child: DailyPieChart(
+            dayRepresentation: y,
+          ),
+        );
+        _days = [w]..addAll(_days);
+      }
+    });
   }
 }
