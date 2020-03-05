@@ -124,18 +124,64 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
                   key: _list,
                   children: _days,
                   controller: _pageController,
-                  onPageChanged: (i) => setState(() => _calculatedayslist(i)),
+                  onPageChanged: (i) {
+                    setState(() {
+                      _calculatedayslist(i);
+                    });
+                  },
                 ),
               ),
             ),
-            ListView.builder(
-              itemBuilder: (context, index) {
-                return ListTile(title: Text('item $index'));
-              },
-              itemCount: 10,
-              shrinkWrap: true,
-              scrollDirection: Axis.vertical,
-              physics: NeverScrollableScrollPhysics(),
+            Row(
+              children: <Widget>[
+                Hero(
+                  tag: 'ActivitiesTag',
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Text(
+                      'Activities',
+                      style: TextStyle(
+                        fontSize: 25.0,
+                        fontWeight: FontWeight.w300,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              mainAxisAlignment: MainAxisAlignment.center,
+            ),
+            GestureDetector(
+              child: ListView.builder(
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text('Activity $index for today'),
+                    trailing: Container(
+                      width: 150.0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text('9h'),
+                          SizedBox(
+                            width: 25.0,
+                          ),
+                          Container(
+                            height: 15.0,
+                            width: 15.0,
+                            color: Colors.green,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                itemCount: 5,
+                shrinkWrap: true,
+                scrollDirection: Axis.vertical,
+                physics: NeverScrollableScrollPhysics(),
+              ),
+              onTap: () => Navigator.of(context).pushNamed('/activity_detail'),
             ),
           ],
         ),
@@ -175,7 +221,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
         );
         _days.add(w);
       } else if (i == 0) {
-        Widget w = Container(
+        /* Widget w = Container(
           width: 400.0,
           height: 400.0,
           child: DailyPieChart(
@@ -183,6 +229,8 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
           ),
         );
         _days = [w]..addAll(_days);
+        print(_days); */
+
       }
     });
   }
