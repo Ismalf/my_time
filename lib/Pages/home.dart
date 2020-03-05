@@ -76,7 +76,31 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
         ),
         backgroundColor: Colors.white,
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.list), onPressed: null),
+          PopupMenuButton(
+            icon: Icon(Icons.list),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Text('Daily View'),
+                    Icon(Icons.donut_large),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Text('Weekly View'),
+                    Icon(Icons.equalizer),
+                  ],
+                ),
+              ),
+            ],
+          ),
           IconButton(icon: Icon(Icons.payment), onPressed: null),
         ],
         title: Row(
