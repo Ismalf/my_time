@@ -25,6 +25,8 @@ class _ActivityWidget extends State<ActivityWidget> {
 
   var _expanded = false;
 
+  var _trailWidth = 150.0;
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -35,26 +37,24 @@ class _ActivityWidget extends State<ActivityWidget> {
       onExpansionChanged: (changed) {
         setState(() {
           _expanded = changed;
+          _trailWidth = _expanded ? 0.0 : 150.0;
         });
       },
-      trailing: !_expanded
-          ? Container(
-              width: 150.0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text('9h'),
-                  SizedBox(
-                    width: 25.0,
-                  ),
-                  CircleColor(color: Colors.green, circleSize: 30.0),
-                ],
-              ),
-            )
-          : Container(
-              width: 10.0,
+      trailing: AnimatedContainer(
+        duration: Duration(milliseconds: 250),
+        width: _trailWidth,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text('9h'),
+            SizedBox(
+              width: 25.0,
             ),
+            CircleColor(color: Colors.green, circleSize: 30.0),
+          ],
+        ),
+      ),
       children: <Widget>[
         Card(
           child: Padding(
