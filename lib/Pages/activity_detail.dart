@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'Widgets/activityWidget.dart';
 
 class ActivityDetail extends StatefulWidget {
   @override
@@ -6,6 +9,10 @@ class ActivityDetail extends StatefulWidget {
 }
 
 class _ActivityDetail extends State<ActivityDetail> {
+  String dropdownValue = 'High';
+  DateTime today = DateTime.now();
+  DateTime selected = DateTime.now();
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -35,10 +42,11 @@ class _ActivityDetail extends State<ActivityDetail> {
             Text(
               'Activities',
               style: TextStyle(
-                  fontWeight: FontWeight.normal,
-                  color: Colors.black38,
-                  fontSize: 25.0,
-                  fontStyle: FontStyle.italic),
+                fontWeight: FontWeight.normal,
+                color: Colors.black38,
+                fontSize: 25.0,
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ],
         ),
@@ -46,7 +54,7 @@ class _ActivityDetail extends State<ActivityDetail> {
       body: ListView(
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.only(top: 15.0),
+            padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
             child: Row(
               children: <Widget>[
                 Hero(
@@ -54,7 +62,7 @@ class _ActivityDetail extends State<ActivityDetail> {
                   child: Material(
                     color: Colors.transparent,
                     child: Text(
-                      'Activities',
+                      'Activities for today',
                       style: TextStyle(
                         fontSize: 25.0,
                         fontWeight: FontWeight.w300,
@@ -66,6 +74,15 @@ class _ActivityDetail extends State<ActivityDetail> {
               ],
               mainAxisAlignment: MainAxisAlignment.center,
             ),
+          ),
+          ListView.builder(
+            itemBuilder: (context, index) {
+              return ActivityWidget();
+            },
+            itemCount: 5,
+            shrinkWrap: true,
+            scrollDirection: Axis.vertical,
+            physics: NeverScrollableScrollPhysics(),
           ),
         ],
       ),

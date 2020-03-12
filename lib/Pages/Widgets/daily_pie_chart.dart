@@ -15,11 +15,17 @@ class DailyPieChart extends StatefulWidget {
 class _DailyPieChart extends State<DailyPieChart> {
   final GlobalKey<AnimatedCircularChartState> _chartKey =
       new GlobalKey<AnimatedCircularChartState>();
-  final _chartSize = const Size(400.0, 400.0);
+      
+  var _chartSize;
 
   double value = 50.0;
   Color labelColor = Colors.blue[200];
-  
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _chartSize =  Size(400.0,400.0);
+  }
   @override
   didUpdateWidget(oldWidget){
     super.didUpdateWidget(oldWidget);

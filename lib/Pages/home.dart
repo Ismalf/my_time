@@ -135,9 +135,9 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
       body: SafeArea(
         child: ListView(
           children: <Widget>[
-            SizedBox(
-              height: 25.0,
-            ),
+            /*SizedBox(
+              height: 15.0,
+            ),*/
             Container(
               height: 400.0,
               child: Align(
