@@ -86,6 +86,15 @@ class _ActivityDetail extends State<ActivityDetail> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _newActivity,
+        tooltip: 'Increment',
+        child: Icon(Icons.add),
+        backgroundColor: Colors.white,
+        splashColor: Colors.white,
+      ),
     );
   }
+
+  _newActivity() {}
 }

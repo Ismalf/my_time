@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
+import 'package:my_time/Data/Models/Time.dart';
 
 class ActivityWidget extends StatefulWidget {
   @override
@@ -9,30 +10,44 @@ class ActivityWidget extends StatefulWidget {
 class _ActivityWidget extends State<ActivityWidget> {
   var today;
 
-  var dropdownValue;
-
   var selected;
 
   var _date;
 
-  var _tempMainColor;
+  var _hasPlan = false;
 
-  var _tempShadeColor;
+  var _taskColor;
 
-  var _mainColor;
+  var _hasAlarm = false;
 
-  var _shadeColor;
+  var _priority = 'Low';
+
+  var _category = 'Misc';
+
+  var _name = '';
 
   var _expanded = false;
 
   var _trailWidth = 150.0;
+
+  Time _alarm;
+
+  Time _timeForTask;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _alarm = Time();
+    _timeForTask = Time();
+  }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return ExpansionTile(
       leading: _expanded ? Icon(Icons.expand_less) : Icon(Icons.expand_more),
-      title: Text('Activity for today'),
+      title: Text(_name),
       initiallyExpanded: false,
       onExpansionChanged: (changed) {
         setState(() {
@@ -47,15 +62,46 @@ class _ActivityWidget extends State<ActivityWidget> {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text('9h'),
+            Text(_timeForTask.toString()),
             SizedBox(
               width: 25.0,
             ),
-            CircleColor(color: Colors.green, circleSize: 30.0),
+            CircleColor(
+                color: _taskColor != null ? _taskColor : Colors.grey,
+                circleSize: 30.0),
           ],
         ),
       ),
       children: <Widget>[
+        ///TASK NAME
+        Card(
+          child: Padding(
+            padding: EdgeInsets.all(15.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Expanded(
+                  child: Text('Task name'),
+                ),
+                Container(
+                  width: 150.0,
+                  height: 30.0,
+                  child: TextFormField(
+                    initialValue: _name,
+                    onChanged: (o) => setState(() => _name = o),
+                    keyboardType: TextInputType.multiline,
+                    decoration: InputDecoration(
+                      hintText: 'Task Name',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        ///TIME FOR THE TASK
         Card(
           child: Padding(
             padding: EdgeInsets.all(15.0),
@@ -67,16 +113,41 @@ class _ActivityWidget extends State<ActivityWidget> {
                   child: Text('Time assigned for the task'),
                 ),
                 Container(
-                  width: 150.0,
+                  width: 50.0,
+                  height: 30.0,
                   child: TextFormField(
-                    onChanged: (o) => print(o),
+                    initialValue: _timeForTask.hours.toString(),
+                    onChanged: (o) =>
+                        setState(() => _timeForTask.hours = int.parse(o)),
                     keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      hintText: 'Hours',
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 5.0, right: 5.0),
+                  child: Text(':'),
+                ),
+                Container(
+                  width: 50.0,
+                  height: 30.0,
+                  child: TextFormField(
+                    initialValue: _timeForTask.minutes.toString(),
+                    onChanged: (o) =>
+                        setState(() => _timeForTask.minutes = int.parse(o)),
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      hintText: 'Mins',
+                    ),
                   ),
                 ),
               ],
             ),
           ),
         ),
+
+        ///COLOR PICKER
         Card(
           child: Padding(
             padding: EdgeInsets.all(15.0),
@@ -85,7 +156,7 @@ class _ActivityWidget extends State<ActivityWidget> {
               children: <Widget>[
                 Text('Color'),
                 CircleColor(
-                  color: Colors.green,
+                  color: _taskColor != null ? _taskColor : Colors.grey,
                   circleSize: 40.0,
                   elevation: 5.0,
                   onColorChoose: () => selectColor(context),
@@ -94,30 +165,69 @@ class _ActivityWidget extends State<ActivityWidget> {
             ),
           ),
         ),
+
+        ///ALARM SETUP
         Card(
           child: Padding(
             padding: EdgeInsets.all(15.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                Text('Alarm'),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
-                    Checkbox(value: false, onChanged: null),
-                    Text('h:mm'),
+                    Checkbox(
+                        value: _hasAlarm,
+                        onChanged: (active) =>
+                            setState(() => _hasAlarm = active)),
+                    Text('Alarm'),
+                    Icon(Icons.alarm)
                   ],
                 ),
+                _hasAlarm
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 50.0,
+                            height: 30.0,
+                            child: TextFormField(
+                              onChanged: (o) => print(o),
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                hintText: 'Hours',
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(left: 5.0, right: 5.0),
+                            child: Text(':'),
+                          ),
+                          Container(
+                            width: 50.0,
+                            height: 30.0,
+                            child: TextFormField(
+                              onChanged: (o) => print(o),
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                hintText: 'Mins',
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(),
               ],
             ),
           ),
         ),
+
+        ///PRIORITY
         Card(
           child: Padding(
             padding: EdgeInsets.all(15.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text('Priority'),
                 Row(
@@ -125,7 +235,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
                     DropdownButton<String>(
-                      value: dropdownValue,
+                      value: _priority,
                       icon: Icon(Icons.expand_more),
                       iconSize: 24,
                       elevation: 16,
@@ -136,7 +246,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                       ),
                       onChanged: (String newValue) {
                         setState(() {
-                          dropdownValue = newValue;
+                          _priority = newValue;
                         });
                       },
                       items: <String>['High', 'Mid', 'Low']
@@ -153,11 +263,13 @@ class _ActivityWidget extends State<ActivityWidget> {
             ),
           ),
         ),
+
+        ///CATEGORY
         Card(
           child: Padding(
             padding: EdgeInsets.all(15.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text('Category'),
                 Row(
@@ -165,7 +277,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
                     DropdownButton<String>(
-                      value: dropdownValue,
+                      value: _category,
                       icon: Icon(Icons.expand_more),
                       iconSize: 24,
                       elevation: 16,
@@ -176,10 +288,12 @@ class _ActivityWidget extends State<ActivityWidget> {
                       ),
                       onChanged: (String newValue) {
                         setState(() {
-                          dropdownValue = newValue;
+                          _category = newValue;
                         });
                       },
-                      items: <String>['High', 'Mid', 'Low']
+
+                      ///TODO load from data base
+                      items: <String>['Misc', 'Sport', 'Academic']
                           .map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
@@ -193,57 +307,69 @@ class _ActivityWidget extends State<ActivityWidget> {
             ),
           ),
         ),
+
+        ///PLAN AHEAD
         Card(
           child: Padding(
             padding: EdgeInsets.all(15.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('Plan Ahead'),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
-                    Checkbox(value: false, onChanged: null),
-                    Text('h:mm'),
+                    Checkbox(
+                        value: _hasPlan,
+                        onChanged: (active) =>
+                            setState(() => _hasPlan = active)),
+                    Text('Plan Ahead'),
+                    Icon(Icons.schedule),
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Text('Start date of the task'),
-                    IconButton(
-                        icon: Icon(Icons.calendar_today),
-                        onPressed: () => selectDate(context))
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Text('End date of the task'),
-                    IconButton(
-                        icon: Icon(Icons.calendar_today),
-                        onPressed: () => selectDate(context))
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Expanded(
-                      child: Text('Max amount of time available (Daily)'),
-                    ),
-                    Container(
-                      width: 150.0,
-                      child: TextFormField(
-                        onChanged: (o) => print(o),
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                  ],
-                ),
+                _hasPlan
+                    ? Column(
+                        children: <Widget>[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Text('Start date of the task'),
+                              IconButton(
+                                  icon: Icon(Icons.calendar_today),
+                                  onPressed: () => selectDate(context))
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Text('End date of the task'),
+                              IconButton(
+                                  icon: Icon(Icons.calendar_today),
+                                  onPressed: () => selectDate(context))
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Expanded(
+                                child: Text(
+                                    'Max amount of time available (Daily)'),
+                              ),
+                              Container(
+                                width: 150.0,
+                                child: TextFormField(
+                                  onChanged: (o) => print(o),
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
+                    : Container(),
               ],
             ),
           ),
@@ -256,7 +382,7 @@ class _ActivityWidget extends State<ActivityWidget> {
     final DateTime picked = await showDatePicker(
         context: context,
         initialDate: DateTime.now(),
-        firstDate: DateTime.now(),
+        firstDate: DateTime(2000),
         lastDate: DateTime(2100));
 
     if (picked != null && picked != _date) {
@@ -267,6 +393,7 @@ class _ActivityWidget extends State<ActivityWidget> {
   }
 
   void selectColor(BuildContext context) async {
+    var _tempMainColor;
     final Color picked = await showDialog(
       context: context,
       barrierDismissible: true,
@@ -276,7 +403,10 @@ class _ActivityWidget extends State<ActivityWidget> {
           contentPadding: const EdgeInsets.all(6.0),
           content: MaterialColorPicker(
             onColorChange: (Color color) {
-              print(color);
+              _tempMainColor = color;
+            },
+            onMainColorChange: (Color color) {
+              _tempMainColor = color;
             },
           ),
           actions: [
@@ -288,8 +418,7 @@ class _ActivityWidget extends State<ActivityWidget> {
               child: Text('SUBMIT'),
               onPressed: () {
                 Navigator.of(context).pop();
-                setState(() => _mainColor = _tempMainColor);
-                setState(() => _shadeColor = _tempShadeColor);
+                setState(() => _taskColor = _tempMainColor);
               },
             ),
           ],
