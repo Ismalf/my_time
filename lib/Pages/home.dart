@@ -135,9 +135,6 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
       body: SafeArea(
         child: ListView(
           children: <Widget>[
-            /*SizedBox(
-              height: 15.0,
-            ),*/
             Container(
               height: 400.0,
               child: Align(
@@ -179,6 +176,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
               child: ListView.builder(
                 itemBuilder: (context, index) {
                   return ListTile(
+                    ///TODO implement activity list widget for homepage
                     title: Text('Activity $index for today'),
                     trailing: Container(
                       width: 150.0,
@@ -210,18 +208,19 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
           ],
         ),
       ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: _newActivity,
         tooltip: 'Increment',
         child: Icon(Icons.add),
         backgroundColor: Colors.white,
         splashColor: Colors.white,
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 
-  _newActivity() {}
+  _newActivity() {
+    ///TODO implement new activity page: home page
+  }
 
   _calculatedayslist(int i) {
     print(i);
@@ -231,10 +230,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
       _yesterday = _today.add(Duration(days: -1));
       _tomorrow = _today.add(Duration(days: 1));
 
-      var t, tom, y;
-      t = _today;
-      tom = _tomorrow;
-      y = _yesterday;
+      var tom = _tomorrow;
       if (i == _days.length - 1) {
         Widget w = Container(
           width: 400.0,
@@ -244,18 +240,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
           ),
         );
         _days.add(w);
-      } else if (i == 0) {
-        /* Widget w = Container(
-          width: 400.0,
-          height: 400.0,
-          child: DailyPieChart(
-            dayRepresentation: y,
-          ),
-        );
-        _days = [w]..addAll(_days);
-        print(_days); */
-
-      }
+      } else if (i == 0) {}
     });
   }
 }

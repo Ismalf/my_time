@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 
 import 'Widgets/activityWidget.dart';
 
@@ -96,5 +96,7 @@ class _ActivityDetail extends State<ActivityDetail> {
     );
   }
 
-  _newActivity() {}
+  _newActivity() {
+    ///TODO implement new activity page
+  }
 }
