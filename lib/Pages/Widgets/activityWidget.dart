@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:my_time/Data/Models/Time.dart';
+import 'package:numberpicker/numberpicker.dart';
 
 class ActivityWidget extends StatefulWidget {
   @override
@@ -40,6 +41,8 @@ class _ActivityWidget extends State<ActivityWidget> {
   var _trailWidth = 150.0;
 
   DateTime _dueDate;
+
+  TimeOfDay _dueDateTime;
 
   Color _defaultColor = Colors.lightBlue;
 
@@ -119,6 +122,7 @@ class _ActivityWidget extends State<ActivityWidget> {
           ),
         ),
 
+        ///DUE DATE
         Card(
           child: Padding(
             padding: EdgeInsets.all(15.0),
@@ -134,11 +138,41 @@ class _ActivityWidget extends State<ActivityWidget> {
                         ? Text(
                             DateFormat('EEE d, MMMM yyyy').format(_dueDate),
                           )
+                        : Text(
+                            'Press the icon to set a due date',
+                            style: TextStyle(
+                              color: Colors.black45,
+                              fontSize: 10.0,
+                            ),
+                          ),
+                    _dueDateTime != null
+                        ? Text(MaterialLocalizations.of(context)
+                            .formatTimeOfDay(_dueDateTime))
                         : Container(),
                   ],
                 ),
                 Theme(
-                  data: Theme.of(context).copyWith(primaryColor: _hasColor()),
+                  data: Theme.of(context).copyWith(
+                    primaryColor: Colors.white,
+                    accentColor: _hasColor(),
+                    accentTextTheme: TextTheme(
+                      body1: TextStyle(
+                        color: _hasColor().computeLuminance() > 0.5
+                            ? Colors.black
+                            : Colors.white,
+                      ),
+                      button: TextStyle(
+                        color: _hasColor(),
+                      ),
+                    ),
+                    textTheme: Theme.of(context).textTheme.copyWith(
+                          button: TextStyle(
+                            color: _hasColor(),
+                          ),
+                        ),
+                    buttonTheme:
+                        ButtonThemeData(textTheme: ButtonTextTheme.accent),
+                  ),
                   child: Builder(
                     builder: (context) => IconButton(
                       icon: Icon(Icons.date_range),
@@ -159,21 +193,46 @@ class _ActivityWidget extends State<ActivityWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Expanded(
-                  child: Text('Time assigned for the task'),
+                Flexible(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Flexible(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Expanded(
+                              child: Text('Time assigned for the task (hh:mm)'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(_timeForTask.toString()),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 Container(
                   width: 50.0,
-                  height: 30.0,
-                  child: TextFormField(
-                    initialValue: _timeForTask.hours < 10
-                        ? '0' + _timeForTask.hours.toString()
-                        : _timeForTask.hours.toString(),
-                    onChanged: (o) =>
-                        setState(() => _timeForTask.hours = int.parse(o)),
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                        hintText: 'Hours', focusColor: _hasColor()),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      primaryColor: _hasColor(),
+                      accentColor: _hasColor(),
+                    ),
+                    child: NumberPicker.integer(
+                      zeroPad: true,
+                      highlightSelectedValue: true,
+                      initialValue: _timeForTask.hours,
+                      minValue: 0,
+                      itemExtent: 30.0,
+                      maxValue: 24,
+                      onChanged: (o) => setState(() => _timeForTask.hours = o),
+                    ),
                   ),
                 ),
                 Padding(
@@ -182,16 +241,21 @@ class _ActivityWidget extends State<ActivityWidget> {
                 ),
                 Container(
                   width: 50.0,
-                  height: 30.0,
-                  child: TextFormField(
-                    initialValue: _timeForTask.minutes < 10
-                        ? '0' + _timeForTask.minutes.toString()
-                        : _timeForTask.minutes.toString(),
-                    onChanged: (o) =>
-                        setState(() => _timeForTask.minutes = int.parse(o)),
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                        hintText: 'Mins', focusColor: _hasColor()),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      primaryColor: _hasColor(),
+                      accentColor: _hasColor(),
+                    ),
+                    child: NumberPicker.integer(
+                      zeroPad: true,
+                      highlightSelectedValue: true,
+                      initialValue: _timeForTask.minutes,
+                      minValue: 0,
+                      itemExtent: 30.0,
+                      maxValue: 59,
+                      onChanged: (o) =>
+                          setState(() => _timeForTask.minutes = o),
+                    ),
                   ),
                 ),
               ],
@@ -221,21 +285,30 @@ class _ActivityWidget extends State<ActivityWidget> {
         ///REMINDER SETUP
         Card(
           child: Padding(
-            padding: EdgeInsets.all(15.0),
+            padding: EdgeInsets.only(right: 15.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Checkbox(
+                    Switch(
                       value: _hasAlarm,
                       onChanged: (active) => setState(() {
-                        _hasAlarm = active;
-                        Future.delayed(
-                            Duration(milliseconds: 50),
-                            () => setState(() => _alarmOpacity =
-                                _alarmOpacity == 1.0 ? 0.0 : 1.0));
+                        //from no active to active
+                        if (!_hasAlarm) {
+                          _hasAlarm = active;
+                          Future.delayed(
+                              Duration(milliseconds: 50),
+                              () => setState(() => _alarmOpacity =
+                                  _alarmOpacity == 1.0 ? 0.0 : 1.0));
+                        }
+                        //from active to no active
+                        else {
+                          _alarmOpacity = _alarmOpacity == 0.0 ? 1.0 : 0.0;
+                          Future.delayed(Duration(milliseconds: 100),
+                              () => setState(() => _hasAlarm = active));
+                        }
                       }),
                       activeColor: _hasColor(),
                     ),
@@ -246,35 +319,42 @@ class _ActivityWidget extends State<ActivityWidget> {
                 _hasAlarm
                     ? AnimatedOpacity(
                         opacity: _alarmOpacity,
-                        duration: Duration(milliseconds: 450),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 50.0,
-                              height: 30.0,
-                              child: TextFormField(
-                                onChanged: (o) => print(o),
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                    hintText: 'Hours', focusColor: _hasColor()),
+                        duration: Duration(milliseconds: _hasAlarm ? 450 : 50),
+                        child: Padding(
+                          padding: EdgeInsets.all(15.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 50.0,
+                                height: 30.0,
+                                child: TextFormField(
+                                  onChanged: (o) => print(o),
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    hintText: 'Hours',
+                                    focusColor: _hasColor(),
+                                  ),
+                                ),
                               ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(left: 5.0, right: 5.0),
-                              child: Text(':'),
-                            ),
-                            Container(
-                              width: 50.0,
-                              height: 30.0,
-                              child: TextFormField(
-                                onChanged: (o) => print(o),
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                    hintText: 'Mins', focusColor: _hasColor()),
+                              Padding(
+                                padding: EdgeInsets.only(left: 5.0, right: 5.0),
+                                child: Text(':'),
                               ),
-                            ),
-                          ],
+                              Container(
+                                width: 50.0,
+                                height: 30.0,
+                                child: TextFormField(
+                                  onChanged: (o) => print(o),
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    hintText: 'Mins',
+                                    focusColor: _hasColor(),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       )
                     : Container(),
@@ -372,7 +452,7 @@ class _ActivityWidget extends State<ActivityWidget> {
         ///PLAN AHEAD
         Card(
           child: Padding(
-            padding: EdgeInsets.all(15.0),
+            padding: EdgeInsets.only(right: 15.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -380,7 +460,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
-                    Checkbox(
+                    Switch(
                       value: _hasPlan,
                       onChanged: (active) => setState(() {
                         _hasPlan = active;
@@ -404,83 +484,99 @@ class _ActivityWidget extends State<ActivityWidget> {
                   ],
                 ),
                 _hasPlan
-                    ? Column(
-                        children: <Widget>[
-                          AnimatedOpacity(
-                            duration: Duration(milliseconds: 500),
-                            opacity: _startDatePhOpacity,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              mainAxisSize: MainAxisSize.max,
-                              children: <Widget>[
-                                Text('Start date of the task'),
-                                Theme(
-                                  data: Theme.of(context)
-                                      .copyWith(primaryColor: _hasColor()),
-                                  child: Builder(
-                                    builder: (context) => IconButton(
-                                      icon: Icon(Icons.calendar_today),
-                                      onPressed: () => selectDate(context),
+                    ? Padding(
+                        padding: EdgeInsets.all(15.0),
+                        child: Column(
+                          children: <Widget>[
+                            AnimatedOpacity(
+                              duration: Duration(milliseconds: 500),
+                              opacity: _startDatePhOpacity,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.max,
+                                children: <Widget>[
+                                  Text('Start date of the task'),
+                                  Theme(
+                                    data: Theme.of(context)
+                                        .copyWith(primaryColor: _hasColor()),
+                                    child: Builder(
+                                      builder: (context) => IconButton(
+                                        icon: Icon(Icons.calendar_today),
+                                        onPressed: () => selectDate(context),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          AnimatedOpacity(
-                            duration: Duration(milliseconds: 500),
-                            opacity: _dueDatePhOpacity,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              mainAxisSize: MainAxisSize.max,
-                              children: <Widget>[
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text('Due date'),
-                                    _dueDate != null
-                                        ? Text(
-                                            DateFormat('EEE d, MMMM yyyy')
-                                                .format(_dueDate),
-                                          )
-                                        : Container(),
-                                  ],
-                                ),
-                                Theme(
-                                  data: Theme.of(context)
-                                      .copyWith(primaryColor: _hasColor()),
-                                  child: Builder(
-                                    builder: (context) => IconButton(
-                                      icon: Icon(Icons.calendar_today),
-                                      onPressed: () => _selectDueDate(context),
+                            AnimatedOpacity(
+                              duration: Duration(milliseconds: 500),
+                              opacity: _dueDatePhOpacity,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.max,
+                                children: <Widget>[
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text('Due date'),
+                                      _dueDate != null
+                                          ? Text(
+                                              DateFormat('EEE d, MMMM yyyy')
+                                                  .format(_dueDate),
+                                            )
+                                          : Container(),
+                                      _dueDateTime != null
+                                          ? Text(
+                                              MaterialLocalizations.of(context)
+                                                  .formatTimeOfDay(
+                                                      _dueDateTime),
+                                            )
+                                          : Container(),
+                                    ],
+                                  ),
+                                  Theme(
+                                    data: Theme.of(context).copyWith(
+                                      primaryColor: Colors.white,
+                                    ),
+                                    child: Builder(
+                                      builder: (context) => IconButton(
+                                        icon: Icon(Icons.calendar_today),
+                                        onPressed: () =>
+                                            _selectDueDate(context),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          AnimatedOpacity(
-                            opacity: _timeAvailablePhOpacity,
-                            duration: Duration(milliseconds: 500),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              mainAxisSize: MainAxisSize.max,
-                              children: <Widget>[
-                                Expanded(
-                                  child: Text(
-                                      'Max amount of time available (Daily)'),
-                                ),
-                                Container(
-                                  width: 150.0,
-                                  child: TextFormField(
-                                    onChanged: (o) => print(o),
-                                    keyboardType: TextInputType.number,
+                            AnimatedOpacity(
+                              opacity: _timeAvailablePhOpacity,
+                              duration: Duration(milliseconds: 500),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.max,
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Text(
+                                        'Max amount of time available (Daily)'),
                                   ),
-                                ),
-                              ],
+                                  Container(
+                                    width: 150.0,
+                                    child: TextFormField(
+                                      onChanged: (o) => print(o),
+                                      keyboardType: TextInputType.number,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       )
                     : Container(),
               ],
@@ -510,13 +606,35 @@ class _ActivityWidget extends State<ActivityWidget> {
     final DateTime picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
+      firstDate: DateTime.now().subtract(
+        Duration(days: 1),
+      ),
       lastDate: DateTime(2100),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: Theme.of(context).colorScheme.copyWith(
+                primary: _hasColor(),
+              ),
+        ),
+        child: child,
+      ),
     );
-
+    final TimeOfDay _time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: Theme.of(context).colorScheme.copyWith(
+                primary: _hasColor(),
+              ),
+        ),
+        child: child,
+      ),
+    );
     if (picked != null && picked != _dueDate) {
       setState(() {
         _dueDate = picked;
+        _dueDateTime = _time;
       });
     }
   }
@@ -530,21 +648,30 @@ class _ActivityWidget extends State<ActivityWidget> {
         return AlertDialog(
           title: Text('Task Color'),
           contentPadding: const EdgeInsets.all(6.0),
-          content: MaterialColorPicker(
-            onColorChange: (Color color) {
-              _tempMainColor = color;
-            },
-            onMainColorChange: (Color color) {
-              _tempMainColor = color;
-            },
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          content: Container(
+            height: 250.0,
+            child: MaterialColorPicker(
+              selectedColor: _hasColor(),
+              onColorChange: (Color color) {
+                _tempMainColor = color;
+              },
+              onMainColorChange: (Color color) {
+                _tempMainColor = color;
+              },
+            ),
           ),
           actions: [
             FlatButton(
-              child: Text('CANCEL'),
+              child: Text('Cancel'),
+              textColor: _hasColor(),
               onPressed: Navigator.of(context).pop,
             ),
             FlatButton(
-              child: Text('SUBMIT'),
+              child: Text('Ok'),
+              textColor: _hasColor(),
               onPressed: () {
                 Navigator.of(context).pop();
                 setState(() => _taskColor = _tempMainColor);

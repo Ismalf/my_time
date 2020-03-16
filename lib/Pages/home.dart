@@ -240,7 +240,11 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
           ),
         );
         _days.add(w);
-      } else if (i == 0) {}
+      } 
+      if(i+2==_days.length - 1){
+        _days.removeLast();
+      }
     });
+    print(_days.length);
   }
 }
