@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:my_time/Data/Models/Time.dart';
 import 'package:numberpicker/numberpicker.dart';
+import 'package:flutter_picker/flutter_picker.dart';
 
 class ActivityWidget extends StatefulWidget {
   @override
@@ -46,16 +49,30 @@ class _ActivityWidget extends State<ActivityWidget> {
 
   Color _defaultColor = Colors.lightBlue;
 
-  Time _alarm;
-
   Time _timeForTask;
+
+  String _pickerData;
+
+  DateTime _reminder;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _alarm = Time();
     _timeForTask = Time();
+    //Build data at the construction of the widget
+    _buildReminderModalPickerData();
+  }
+
+  _buildReminderModalPickerData() {
+    var x = [];
+    //Fill an array with value from 1 to 99
+    for (var i = 1; i <= 99; i++) x.add(i);
+    //Fill an array with following values
+    var y = '["Minutes", "Hours", "Days"]';
+    var z = [x, y];
+    //this data will be used in the reminder picker modal
+    _pickerData = z.toString();
   }
 
   @override
@@ -106,11 +123,10 @@ class _ActivityWidget extends State<ActivityWidget> {
                 ),
                 Container(
                   width: 150.0,
-                  height: 30.0,
                   child: TextFormField(
                     initialValue: _name,
                     onChanged: (o) => setState(() => _name = o),
-                    keyboardType: TextInputType.multiline,
+                    cursorColor: _hasColor(),
                     decoration: InputDecoration(
                         hintText: 'Task Name',
                         focusColor: _hasColor(),
@@ -175,6 +191,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                   ),
                   child: Builder(
                     builder: (context) => IconButton(
+                      color: _dueDate != null ? _hasColor() : Colors.black,
                       icon: Icon(Icons.date_range),
                       onPressed: () => _selectDueDate(context),
                     ),
@@ -325,33 +342,59 @@ class _ActivityWidget extends State<ActivityWidget> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Container(
-                                width: 50.0,
-                                height: 30.0,
-                                child: TextFormField(
-                                  onChanged: (o) => print(o),
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    hintText: 'Hours',
-                                    focusColor: _hasColor(),
-                                  ),
+                              Flexible(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Flexible(
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: <Widget>[
+                                          Expanded(
+                                            child: Text('Remind me: '),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        _reminder != null
+                                            ? Text(
+                                                DateFormat(
+                                                        'EEE d, MMMM yyyy HH:mm')
+                                                    .format(_reminder),
+                                              )
+                                            : Text('No reminder set'),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Padding(
-                                padding: EdgeInsets.only(left: 5.0, right: 5.0),
-                                child: Text(':'),
-                              ),
-                              Container(
-                                width: 50.0,
-                                height: 30.0,
-                                child: TextFormField(
-                                  onChanged: (o) => print(o),
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    hintText: 'Mins',
-                                    focusColor: _hasColor(),
-                                  ),
+                              Theme(
+                                data: Theme.of(context).copyWith(
+                                  primaryColor: _hasColor(),
+                                  accentColor: _hasColor(),
+                                  colorScheme: Theme.of(context)
+                                      .colorScheme
+                                      .copyWith(primary: _hasColor()),
                                 ),
+                                child: _reminder == null
+                                    ? IconButton(
+                                        color: _reminder != null
+                                            ? _hasColor()
+                                            : Colors.black,
+                                        icon: Icon(Icons.add),
+                                        onPressed: () =>
+                                            showPickerModal(context),
+                                      )
+                                    : IconButton(
+                                        color: _hasColor(),
+                                        icon: Icon(Icons.clear),
+                                        onPressed: () =>
+                                            setState(() => _reminder = null),
+                                      ),
                               ),
                             ],
                           ),
@@ -685,5 +728,38 @@ class _ActivityWidget extends State<ActivityWidget> {
 
   Color _hasColor() {
     return _taskColor != null ? _taskColor : _defaultColor;
+  }
+
+  showPickerModal(BuildContext context) {
+    new Picker(
+        adapter: PickerDataAdapter<String>(
+            pickerdata: new JsonDecoder().convert(_pickerData), isArray: true),
+        changeToFirst: true,
+        hideHeader: false,
+        height: 100.0,
+        confirmTextStyle: TextStyle(color: _hasColor(), fontSize: 20.0),
+        cancelTextStyle: TextStyle(color: _hasColor(), fontSize: 15.0),
+        onConfirm: (Picker picker, List value) {
+          print(value.toString());
+          print(picker.adapter.text);
+          var x = picker.adapter.getSelectedValues();
+          switch (x[1]) {
+            case "Minutes":
+              _reminder =
+                  DateTime.now().subtract(Duration(minutes: int.parse(x[0])));
+              break;
+            case "Hours":
+              _reminder =
+                  DateTime.now().subtract(Duration(hours: int.parse(x[0])));
+              break;
+            case "Days":
+              _reminder =
+                  DateTime.now().subtract(Duration(days: int.parse(x[0])));
+              break;
+
+            default:
+          }
+          setState(() {});
+        }).showModal(context); //_scaffoldKey.currentState);
   }
 }
