@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:my_time/Data/Models/activity_model.dart';
+import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 
 import 'Widgets/activityWidget.dart';
+
+enum DraggingMode {
+  iOS,
+  Android,
+}
 
 class ActivityDetail extends StatefulWidget {
   @override
@@ -9,9 +16,20 @@ class ActivityDetail extends StatefulWidget {
 }
 
 class _ActivityDetail extends State<ActivityDetail> {
-  String dropdownValue = 'High';
-  DateTime today = DateTime.now();
-  DateTime selected = DateTime.now();
+  List<ActivityWidget> _activities;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _activities = List();
+
+    for (var i = 0; i < 5; i++) {
+      _activities.add(ActivityWidget(
+        new Task(),
+        key: ValueKey(i),
+      ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +37,7 @@ class _ActivityDetail extends State<ActivityDetail> {
     Color _appbarcolors = Theme.of(context).brightness == Brightness.light
         ? Colors.black
         : Colors.white;
-    
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
@@ -58,40 +76,49 @@ class _ActivityDetail extends State<ActivityDetail> {
           ],
         ),
       ),
-      body: ListView(
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
-            child: Row(
-              children: <Widget>[
-                Hero(
-                  tag: 'ActivitiesTag',
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Text(
-                      'Activities for today',
-                      style: TextStyle(
-                        fontSize: 25.0,
-                        fontWeight: FontWeight.w300,
-                        fontStyle: FontStyle.italic,
+      body: ReorderableList(
+        child: ListView(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(top: 15.0, bottom: 15.0),
+              child: Row(
+                children: <Widget>[
+                  Hero(
+                    tag: 'ActivitiesTag',
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Text(
+                        'Activities for today',
+                        style: TextStyle(
+                          fontSize: 25.0,
+                          fontWeight: FontWeight.w300,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-              mainAxisAlignment: MainAxisAlignment.center,
+                ],
+                mainAxisAlignment: MainAxisAlignment.center,
+              ),
             ),
-          ),
-          ListView.builder(
-            itemBuilder: (context, index) {
-              return ActivityWidget();
-            },
-            itemCount: 5,
-            shrinkWrap: true,
-            scrollDirection: Axis.vertical,
-            physics: NeverScrollableScrollPhysics(),
-          ),
-        ],
+            ListView.builder(
+              itemBuilder: (context, index) {
+                return Item(
+                  data: _activities[index],
+                  isFirst: index == 0,
+                  isLast: index == _activities.length - 1,
+                  draggingMode: DraggingMode.Android,
+                );
+              },
+              itemCount: _activities.length,
+              shrinkWrap: true,
+              scrollDirection: Axis.vertical,
+              physics: NeverScrollableScrollPhysics(),
+            ),
+          ],
+        ),
+        onReorder: this._reorderCallback,
+        onReorderDone: this._reorderDone,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _newActivity,
@@ -108,5 +135,113 @@ class _ActivityDetail extends State<ActivityDetail> {
 
   _newActivity() {
     ///TODO implement new activity page
+  }
+
+  int _indexOfKey(Key key) {
+    return _activities.indexWhere((ActivityWidget d) => d.key == key);
+  }
+
+  bool _reorderCallback(Key item, Key newPosition) {
+    int draggingIndex = _indexOfKey(item);
+    int newPositionIndex = _indexOfKey(newPosition);
+
+    // Uncomment to allow only even target reorder possition
+    // if (newPositionIndex % 2 == 1)
+    //   return false;
+
+    final draggedItem = _activities[draggingIndex];
+    setState(() {
+      debugPrint("Reordering $item -> $newPosition");
+      _activities.removeAt(draggingIndex);
+      _activities.insert(newPositionIndex, draggedItem);
+    });
+    return true;
+  }
+
+  void _reorderDone(Key item) {
+    final draggedItem = _activities[_indexOfKey(item)];
+    debugPrint("Reordering finished for ${draggedItem.task.name}}");
+  }
+}
+
+class Item extends StatelessWidget {
+  Item({
+    this.data,
+    this.isFirst,
+    this.isLast,
+    this.draggingMode,
+  });
+
+  final ActivityWidget data;
+  final bool isFirst;
+  final bool isLast;
+  final DraggingMode draggingMode;
+
+  Widget _buildChild(BuildContext context, ReorderableItemState state) {
+    BoxDecoration decoration;
+
+    if (state == ReorderableItemState.dragProxy ||
+        state == ReorderableItemState.dragProxyFinished) {
+      // slightly transparent background white dragging (just like on iOS)
+      decoration = BoxDecoration(color: Color(0xD0FFFFFF));
+    } else {
+      bool placeholder = state == ReorderableItemState.placeholder;
+      decoration = BoxDecoration(
+          border: Border(
+              top: isFirst && !placeholder
+                  ? Divider.createBorderSide(context) //
+                  : BorderSide.none,
+              bottom: isLast && placeholder
+                  ? BorderSide.none //
+                  : Divider.createBorderSide(context)),
+          color: placeholder ? null : Colors.transparent);
+    }
+
+    // For iOS dragging mdoe, there will be drag handle on the right that triggers
+    // reordering; For android mode it will be just an empty container
+    Widget dragHandle = draggingMode == DraggingMode.iOS
+        ? ReorderableListener(
+            child: Container(
+              padding: EdgeInsets.only(right: 10.0, left: .0),
+              color: Colors.transparent,
+              child: Center(
+                child: Icon(Icons.reorder, color: Color(0xFF888888)),
+              ),
+            ),
+          )
+        : Container();
+
+    Widget content = Container(
+      //decoration: decoration,
+      child: Opacity(
+        // hide content for placeholder
+        opacity: state == ReorderableItemState.placeholder ? 0.0 : 1.0,
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: data,
+            ),
+            // Triggers the reordering
+            dragHandle,
+          ],
+        ),
+      ),
+    );
+
+    // For android dragging mode, wrap the entire content in DelayedReorderableListener
+    if (draggingMode == DraggingMode.Android) {
+      content = DelayedReorderableListener(
+        child: content,
+      );
+    }
+
+    return content;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ReorderableItem(
+        key: data.key, //
+        childBuilder: _buildChild);
   }
 }

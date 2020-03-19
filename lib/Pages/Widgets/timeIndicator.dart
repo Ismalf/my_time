@@ -43,7 +43,7 @@ class TimeIndicator extends StatelessWidget {
                   padding: EdgeInsets.only(right: 10.0),
                   child: Text(
                     hour == 0
-                        ? zeroPad && minute < 10 ? '0$hour' : '$hour'
+                        ? zeroPad && hour < 10 ? '0$hour' : '$hour'
                         : zeroPad && minute < 10 ? '0$minute' : '$minute',
                     style: TextStyle(fontSize: 20.0),
                   ),

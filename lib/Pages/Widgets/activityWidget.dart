@@ -3,46 +3,37 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:my_time/Data/Models/Time.dart';
+import 'package:my_time/Data/Models/activity_model.dart';
 import 'package:my_time/Pages/Widgets/timeIndicator.dart';
-import 'package:numberpicker/numberpicker.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 
 class ActivityWidget extends StatefulWidget {
+  
+  final Task task;
+  final Key key;
+  ActivityWidget(this.task, {this.key});
+  
   @override
-  _ActivityWidget createState() => _ActivityWidget();
+  _ActivityWidget createState() => _ActivityWidget(this.task);
 }
 
 class _ActivityWidget extends State<ActivityWidget> {
+
+  _ActivityWidget(this._task);
+
+  ///TASK CLASS VARIABLES
+  
+  Task _task;
+
   ///WIDGET VARIABLES
+
+  var _mainctx;
 
   var _dateTextStyle;
 
   var _subtitleTextStyle;
 
-  var _hasDailyReminder = false;
-
-  var _mainctx;
-
-  ///TASK CLASS VARIABLES
-
-  var today;
-
-  var selected;
-
-  var _date;
-
-  var _hasPlan = false;
-
-  var _taskColor;
-
-  var _hasAlarm = false;
-
-  var _priority = 'Low';
-
-  var _category = 'Misc';
-
-  var _name = '';
+  var _cardsOpacity = 1.0;
 
   var _alarmOpacity = 0.0;
 
@@ -56,21 +47,9 @@ class _ActivityWidget extends State<ActivityWidget> {
 
   var _trailWidth = 150.0;
 
-  DateTime _dueDate;
-
-  DateTime _startDate;
-
-  TimeOfDay _dueDateTime;
-
-  TimeOfDay _startDateTime;
-
   Color _defaultColor = Colors.lightBlue;
 
-  TimeOfDay _timeForTask;
-
   String _pickerData;
-
-  DateTime _reminder;
 
   @override
   void initState() {
@@ -80,8 +59,8 @@ class _ActivityWidget extends State<ActivityWidget> {
     //Build data at the construction of the widget
     _buildReminderModalPickerData();
     //load from DB
-    _startDate = DateTime.now();
-    _startDateTime = TimeOfDay.now();
+    _task.startDate = DateTime.now();
+    _task.startDateTime = TimeOfDay.now();
     _dateTextStyle = TextStyle(fontWeight: FontWeight.w100, fontSize: 13.0);
     _subtitleTextStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 15.0);
   }
@@ -101,9 +80,11 @@ class _ActivityWidget extends State<ActivityWidget> {
   Widget build(BuildContext context) {
     // TODO: implement build
     setState(() => _mainctx = context);
+    var hour = _task.timeForTask?.hour ?? 0;
+    var minute = _task.timeForTask?.minute ?? 0;
     return ExpansionTile(
       leading: _expanded ? Icon(Icons.expand_less) : Icon(Icons.expand_more),
-      title: Text(_name),
+      title: Text(_task.name),
       initiallyExpanded: false,
       onExpansionChanged: (changed) {
         setState(() {
@@ -119,8 +100,10 @@ class _ActivityWidget extends State<ActivityWidget> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              _timeForTask != null
-                  ? Text(_timeForTask.format(context))
+              _task.timeForTask != null
+                  ? Text((hour < 10 ? '0$hour' : '$hour') +
+                      ' : ' +
+                      (minute < 10 ? '0$minute' : '$minute'))
                   : Container(),
               SizedBox(
                 width: 25.0,
@@ -152,8 +135,8 @@ class _ActivityWidget extends State<ActivityWidget> {
                 Container(
                   width: 150.0,
                   child: TextFormField(
-                    initialValue: _name,
-                    onChanged: (o) => setState(() => _name = o),
+                    initialValue: _task.name,
+                    onChanged: (o) => setState(() => _task.name = o),
                     cursorColor: _hasColor(),
                     decoration: InputDecoration(
                       hintText: 'Task Name',
@@ -173,120 +156,123 @@ class _ActivityWidget extends State<ActivityWidget> {
         ),
 
         ///DUE DATE
-        _hasPlan
+        _task.hasPlan
             ? Container()
-            : Card(
-                child: Padding(
-                  padding: EdgeInsets.all(15.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      Flexible(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              'Due date',
-                              style: _subtitleTextStyle,
-                            ),
-                            _dueDate != null
-                                ? Text(
-                                    DateFormat('EEE d, MMMM yyyy')
-                                        .format(_dueDate),
-                                    style: _dateTextStyle,
-                                  )
-                                : Text(
-                                    'Press the icon to set a due date',
-                                    style: _dateTextStyle,
-                                  ),
-                            _dueDateTime != null
-                                ? Text(MaterialLocalizations.of(context)
-                                    .formatTimeOfDay(_dueDateTime))
-                                : Container(),
-                          ],
-                        ),
-                      ),
-                      Theme(
-                        data: Theme.of(context).copyWith(
-                          primaryColor: Colors.white,
-                          accentColor: _hasColor(),
-                          accentTextTheme: TextTheme(
-                            body1: TextStyle(
-                              color: _hasColor().computeLuminance() > 0.5
-                                  ? Colors.black
-                                  : Colors.white,
-                            ),
-                            button: TextStyle(
-                              color: _hasColor(),
-                            ),
-                          ),
-                          textTheme: Theme.of(context).textTheme.copyWith(
-                                button: TextStyle(
-                                  color: _hasColor(),
-                                ),
+            : AnimatedOpacity(
+                opacity: _cardsOpacity,
+                duration: Duration(milliseconds: 500),
+                child: Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                'Due date',
+                                style: _subtitleTextStyle,
                               ),
-                          buttonTheme: ButtonThemeData(
-                              textTheme: ButtonTextTheme.accent),
-                        ),
-                        child: Builder(
-                          builder: (context) => IconButton(
-                            color: _dueDate != null
-                                ? _hasColor()
-                                : Theme.of(context).primaryColor,
-                            icon: Icon(Icons.date_range),
-                            onPressed: () => _selectDueDate(context),
+                              _task.dueDate != null
+                                  ? Text(
+                                      DateFormat('EEE d, MMMM yyyy')
+                                          .format(_task.dueDate),
+                                      style: _dateTextStyle,
+                                    )
+                                  : Text(
+                                      'Press the icon to set a due date',
+                                      style: _dateTextStyle,
+                                    ),
+                              _task.dueDateTime != null
+                                  ? Text(MaterialLocalizations.of(context)
+                                      .formatTimeOfDay(_task.dueDateTime))
+                                  : Container(),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                        Theme(
+                          data: Theme.of(context).copyWith(
+                            primaryColor: Colors.white,
+                            accentColor: _hasColor(),
+                            accentTextTheme: TextTheme(
+                              body1: TextStyle(
+                                color: _hasColor().computeLuminance() > 0.5
+                                    ? Colors.black
+                                    : Colors.white,
+                              ),
+                              button: TextStyle(
+                                color: _hasColor(),
+                              ),
+                            ),
+                            textTheme: Theme.of(context).textTheme.copyWith(
+                                  button: TextStyle(
+                                    color: _hasColor(),
+                                  ),
+                                ),
+                            buttonTheme: ButtonThemeData(
+                                textTheme: ButtonTextTheme.accent),
+                          ),
+                          child: Builder(
+                            builder: (context) => IconButton(
+                              color: _task.dueDate != null
+                                  ? _hasColor()
+                                  : Theme.of(context).primaryColor,
+                              icon: Icon(Icons.date_range),
+                              onPressed: () => _selectDueDate(context),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
 
         ///TIME FOR THE TASK
-        Card(
-          child: Padding(
-            padding: EdgeInsets.all(15.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Flexible(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Flexible(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Expanded(
-                              child: Text('Time assigned for the task '),
-                            ),
-                          ],
+        GestureDetector(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.all(15.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Flexible(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Flexible(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Expanded(
+                                child: Text('Time assigned for the task'),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      /* FlatButton(
-                        padding: EdgeInsets.all(0.0),
-                        onPressed: () => ,
-                        child: Text('Set'),
-                      ), */
-                    ],
+                        Text(
+                          'Tap to set',
+                          style: _dateTextStyle,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                GestureDetector(
-                  onTap: ()=>_showTaskTimeModal(context),
-                  child: TimeIndicator(
-                    hour: _timeForTask?.hour ?? 0,
-                    minute: _timeForTask?.minute ?? 0,
+                  TimeIndicator(
+                    hour: _task.timeForTask?.hour ?? 0,
+                    minute: _task.timeForTask?.minute ?? 0,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
+          onTap: () => _showTaskTimeModal(context),
         ),
 
         ///COLOR PICKER
@@ -327,7 +313,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
                     DropdownButton<String>(
-                      value: _priority,
+                      value: _task.priority,
                       icon: Icon(Icons.expand_more),
                       iconSize: 24,
                       elevation: 16,
@@ -337,7 +323,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                       ),
                       onChanged: (String newValue) {
                         setState(() {
-                          _priority = newValue;
+                          _task.priority = newValue;
                         });
                       },
                       items: <String>['High', 'Mid', 'Low']
@@ -371,7 +357,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
                     DropdownButton<String>(
-                      value: _category,
+                      value: _task.category,
                       icon: Icon(Icons.expand_more),
                       iconSize: 24,
                       elevation: 16,
@@ -381,7 +367,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                       ),
                       onChanged: (String newValue) {
                         setState(() {
-                          _category = newValue;
+                          _task.category = newValue;
                         });
                       },
 
@@ -412,9 +398,9 @@ class _ActivityWidget extends State<ActivityWidget> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Switch(
-                      value: _hasAlarm,
+                      value: _task.hasAlarm,
                       onChanged: (active) => setState(() {
-                        _hasAlarm
+                        _task.hasAlarm
                             ? _hideReminderSettings()
                             : _showReminderSettings();
                       }),
@@ -424,10 +410,10 @@ class _ActivityWidget extends State<ActivityWidget> {
                     Icon(Icons.alarm)
                   ],
                 ),
-                _hasAlarm
+                _task.hasAlarm
                     ? AnimatedOpacity(
                         opacity: _alarmOpacity,
-                        duration: Duration(milliseconds: _hasAlarm ? 450 : 50),
+                        duration: Duration(milliseconds: _task.hasAlarm ? 450 : 50),
                         child: Padding(
                           padding: EdgeInsets.all(15.0),
                           child: Row(
@@ -452,22 +438,22 @@ class _ActivityWidget extends State<ActivityWidget> {
                                     Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: <Widget>[
-                                        _reminder != null
-                                            ? _hasPlan
+                                        _task.reminder != null
+                                            ? _task.hasPlan
                                                 ? Text(
                                                     'Daily at: ' +
                                                         TimeOfDay.fromDateTime(
-                                                                _reminder)
+                                                                _task.reminder)
                                                             .format(context),
                                                     style: _subtitleTextStyle,
                                                   )
                                                 : Text(
                                                     DateFormat(
                                                           'EEE d, MMMM yyyy',
-                                                        ).format(_reminder) +
+                                                        ).format(_task.reminder) +
                                                         ' ' +
                                                         TimeOfDay.fromDateTime(
-                                                                _reminder)
+                                                                _task.reminder)
                                                             .format(context),
                                                     style: _subtitleTextStyle,
                                                   )
@@ -488,21 +474,22 @@ class _ActivityWidget extends State<ActivityWidget> {
                                       .colorScheme
                                       .copyWith(primary: _hasColor()),
                                 ),
-                                child: _reminder == null
+                                child: _task.reminder == null
                                     ? IconButton(
-                                        color: _reminder != null
+                                        color: _task.reminder != null
                                             ? _hasColor()
                                             : Theme.of(_mainctx).accentColor,
                                         icon: Icon(Icons.add),
                                         onPressed: () => _showReminderModal(
                                             context,
-                                            dueDate: _dueDate),
+                                            dueDate: _task.dueDate,
+                                            startDate: _task.startDate),
                                       )
                                     : IconButton(
                                         color: _hasColor(),
                                         icon: Icon(Icons.clear),
                                         onPressed: () =>
-                                            setState(() => _reminder = null),
+                                            setState(() => _task.reminder = null),
                                       ),
                               ),
                             ],
@@ -527,7 +514,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
                     Switch(
-                      value: _hasPlan,
+                      value: _task.hasPlan,
                       onChanged: (active) => setState(() {
                         active
                             ? _showPlanAheadSettings()
@@ -539,14 +526,14 @@ class _ActivityWidget extends State<ActivityWidget> {
                     Icon(Icons.schedule),
                   ],
                 ),
-                _hasPlan
+                _task.hasPlan
                     ? Padding(
                         padding: EdgeInsets.all(15.0),
                         child: Column(
                           children: <Widget>[
                             AnimatedOpacity(
                               duration:
-                                  Duration(milliseconds: !_hasPlan ? 500 : 150),
+                                  Duration(milliseconds: !_task.hasPlan ? 500 : 150),
                               opacity: _startDatePhOpacity,
                               child: Row(
                                 mainAxisAlignment:
@@ -561,18 +548,18 @@ class _ActivityWidget extends State<ActivityWidget> {
                                         'Start date',
                                         style: _subtitleTextStyle,
                                       ),
-                                      _startDate != null
+                                      _task.startDate != null
                                           ? Text(
                                               DateFormat('EEE d, MMMM yyyy')
-                                                  .format(_startDate),
+                                                  .format(_task.startDate),
                                               style: _dateTextStyle,
                                             )
                                           : Container(),
-                                      _startDateTime != null
+                                      _task.startDateTime != null
                                           ? Text(
                                               MaterialLocalizations.of(context)
                                                   .formatTimeOfDay(
-                                                      _startDateTime),
+                                                      _task.startDateTime),
                                               style: _dateTextStyle,
                                             )
                                           : Container(),
@@ -616,7 +603,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                             ),
                             AnimatedOpacity(
                               duration:
-                                  Duration(milliseconds: !_hasPlan ? 500 : 100),
+                                  Duration(milliseconds: !_task.hasPlan ? 500 : 100),
                               opacity: _dueDatePhOpacity,
                               child: Row(
                                 mainAxisAlignment:
@@ -631,24 +618,24 @@ class _ActivityWidget extends State<ActivityWidget> {
                                         'Due date',
                                         style: _subtitleTextStyle,
                                       ),
-                                      _dueDate == null
+                                      _task.dueDate == null
                                           ? Text(
                                               'Leave empty for daily tasks',
                                               style: _dateTextStyle,
                                             )
                                           : Container(),
-                                      _dueDate != null
+                                      _task.dueDate != null
                                           ? Text(
                                               DateFormat('EEE d, MMMM yyyy')
-                                                  .format(_dueDate),
+                                                  .format(_task.dueDate),
                                               style: _dateTextStyle,
                                             )
                                           : Container(),
-                                      _dueDateTime != null
+                                      _task.dueDateTime != null
                                           ? Text(
                                               MaterialLocalizations.of(context)
                                                   .formatTimeOfDay(
-                                                      _dueDateTime),
+                                                      _task.dueDateTime),
                                               style: _dateTextStyle,
                                             )
                                           : Container(),
@@ -693,7 +680,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                             AnimatedOpacity(
                               opacity: _timeAvailablePhOpacity,
                               duration:
-                                  Duration(milliseconds: !_hasPlan ? 500 : 50),
+                                  Duration(milliseconds: !_task.hasPlan ? 500 : 50),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -706,11 +693,11 @@ class _ActivityWidget extends State<ActivityWidget> {
                                     ),
                                   ),
                                   Checkbox(
-                                    value: _hasDailyReminder,
+                                    value: _task.hasDailyReminder,
                                     activeColor: _hasColor(),
                                     onChanged: (active) => setState(() {
-                                      _hasDailyReminder = active;
-                                      if (_hasDailyReminder) _forceReminder();
+                                      _task.hasDailyReminder = active;
+                                      if (_task.hasDailyReminder) _forceReminder();
                                     }),
                                   ),
                                 ],
@@ -728,23 +715,10 @@ class _ActivityWidget extends State<ActivityWidget> {
     );
   }
 
-  void selectDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-
-    if (picked != null && picked != _date) {
-      setState(() {
-        _date = picked;
-      });
-    }
-  }
-
   void _showPlanAheadSettings() {
-    _hasPlan = true;
+    _cardsOpacity = 0.0;
+    _task.hasPlan = true;
+
     Future.delayed(
         Duration(milliseconds: 50),
         () => setState(() =>
@@ -764,7 +738,12 @@ class _ActivityWidget extends State<ActivityWidget> {
     _dueDatePhOpacity = _dueDatePhOpacity == 0.0 ? 1.0 : 0.0;
     _startDatePhOpacity = _startDatePhOpacity == 0.0 ? 1.0 : 0.0;
     Future.delayed(
-        Duration(milliseconds: 200), () => setState(() => _hasPlan = false));
+        Duration(milliseconds: 200),
+        () => setState(() {
+              _task.hasPlan = false;
+              Future.delayed(Duration(milliseconds: 50),
+                  () => setState(() => _cardsOpacity = 1.0));
+            }));
   }
 
   void _selectDueDate(BuildContext context) async {
@@ -796,10 +775,10 @@ class _ActivityWidget extends State<ActivityWidget> {
         child: child,
       ),
     );
-    if (picked != null && picked != _dueDate) {
+    if (picked != null && picked != _task.dueDate) {
       setState(() {
-        _dueDate = picked;
-        _dueDateTime = _time;
+        _task.dueDate = picked;
+        _task.dueDateTime = _time;
       });
     }
   }
@@ -833,10 +812,10 @@ class _ActivityWidget extends State<ActivityWidget> {
         child: child,
       ),
     );
-    if (picked != null && picked != _dueDate) {
+    if (picked != null && picked != _task.dueDate) {
       setState(() {
-        _startDate = picked;
-        _startDateTime = _time;
+        _task.startDate = picked;
+        _task.startDateTime = _time;
       });
     }
   }
@@ -876,7 +855,7 @@ class _ActivityWidget extends State<ActivityWidget> {
               textColor: _hasColor(),
               onPressed: () {
                 Navigator.of(context).pop();
-                setState(() => _taskColor = _tempMainColor);
+                setState(() => _task.taskColor = _tempMainColor);
               },
             ),
           ],
@@ -886,7 +865,7 @@ class _ActivityWidget extends State<ActivityWidget> {
   }
 
   Color _hasColor() {
-    return _taskColor != null ? _taskColor : _defaultColor;
+    return _task.taskColor != null ? _task.taskColor : _defaultColor;
   }
 
   _showReminderModal(BuildContext context, {dueDate, startDate}) {
@@ -910,24 +889,27 @@ class _ActivityWidget extends State<ActivityWidget> {
         changeToFirst: true,
         hideHeader: false,
         height: 100.0,
+        backgroundColor: Theme.of(context).primaryColor,
+        textStyle: TextStyle(
+          color: _hasColor(),
+          fontSize: 20.0,
+        ),
         confirmTextStyle: TextStyle(color: _hasColor(), fontSize: 20.0),
         cancelTextStyle: TextStyle(color: _hasColor(), fontSize: 15.0),
         onConfirm: (Picker picker, List value) {
-          print(value.toString());
-          print(picker.adapter.text);
           var x = picker.adapter.getSelectedValues();
-          var _referenceDate = startDate == null ? dueDate : startDate;
+          var _referenceDate = startDate ?? dueDate;
           switch (x[1]) {
             case "Minutes":
-              _reminder =
+              _task.reminder =
                   _referenceDate.subtract(Duration(minutes: int.parse(x[0])));
               break;
             case "Hours":
-              _reminder =
+              _task.reminder =
                   _referenceDate.subtract(Duration(hours: int.parse(x[0])));
               break;
             case "Days":
-              _reminder =
+              _task.reminder =
                   _referenceDate.subtract(Duration(days: int.parse(x[0])));
               break;
 
@@ -946,26 +928,35 @@ class _ActivityWidget extends State<ActivityWidget> {
         adapter: PickerDataAdapter<String>(
             pickerdata: new JsonDecoder().convert(z), isArray: true),
         changeToFirst: true,
+        selectedTextStyle: TextStyle(
+          color: _hasColor(),
+          fontSize: 25.0,
+        ),
         hideHeader: false,
         height: 100.0,
+        backgroundColor: Theme.of(context).primaryColor,
+        textStyle: TextStyle(
+          color: _hasColor(),
+          fontSize: 20.0,
+        ),
         confirmTextStyle: TextStyle(color: _hasColor(), fontSize: 20.0),
         cancelTextStyle: TextStyle(color: _hasColor(), fontSize: 15.0),
         onConfirm: (Picker picker, List value) {
-          print(value.toString());
-          print(picker.adapter.text);
           var time = picker.adapter.getSelectedValues();
-          _timeForTask =
+          _task.timeForTask =
               TimeOfDay(hour: int.parse(time[0]), minute: int.parse(time[1]));
-
+          print(_task.timeForTask.hour.toString() +
+              ':' +
+              _task.timeForTask.minute.toString());
           setState(() {});
         }).showModal(context); //_scaffoldKey.currentState);
   }
 
   _forceReminder() {
-    if (!_hasAlarm) {
+    if (!_task.hasAlarm) {
       setState(() {
         _showReminderSettings();
-        _showReminderModal(context, startDate: _startDate);
+        _showReminderModal(context, startDate: _task.startDate, dueDate: _task.dueDate);
       });
     }
   }
@@ -973,11 +964,11 @@ class _ActivityWidget extends State<ActivityWidget> {
   _hideReminderSettings() {
     _alarmOpacity = _alarmOpacity == 0.0 ? 1.0 : 0.0;
     Future.delayed(
-        Duration(milliseconds: 100), () => setState(() => _hasAlarm = false));
+        Duration(milliseconds: 100), () => setState(() => _task.hasAlarm = false));
   }
 
   _showReminderSettings() {
-    _hasAlarm = true;
+    _task.hasAlarm = true;
     Future.delayed(Duration(milliseconds: 50),
         () => setState(() => _alarmOpacity = _alarmOpacity == 1.0 ? 0.0 : 1.0));
   }
