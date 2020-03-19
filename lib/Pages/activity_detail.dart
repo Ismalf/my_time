@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart';
 
 import 'Widgets/activityWidget.dart';
 
@@ -16,23 +16,30 @@ class _ActivityDetail extends State<ActivityDetail> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
+    Color _appbarcolors = Theme.of(context).brightness == Brightness.light
+        ? Colors.black
+        : Colors.white;
+    
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
         iconTheme: IconThemeData(
-          color: Colors.black,
+          color: _appbarcolors,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : Theme.of(context).primaryColor,
         leading: IconButton(
             icon: Icon(Icons.arrow_back_ios),
             onPressed: () => Navigator.of(context).pop()),
+        centerTitle: true,
         title: Row(
           children: <Widget>[
             Text(
               'My',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: _appbarcolors,
                 fontSize: 25.0,
               ),
             ),
@@ -43,7 +50,7 @@ class _ActivityDetail extends State<ActivityDetail> {
               'Activities',
               style: TextStyle(
                 fontWeight: FontWeight.normal,
-                color: Colors.black38,
+                color: _appbarcolors,
                 fontSize: 25.0,
                 fontStyle: FontStyle.italic,
               ),
@@ -89,8 +96,11 @@ class _ActivityDetail extends State<ActivityDetail> {
       floatingActionButton: FloatingActionButton(
         onPressed: _newActivity,
         tooltip: 'Increment',
-        child: Icon(Icons.add),
-        backgroundColor: Colors.white,
+        child: Icon(
+          Icons.add,
+          color: _appbarcolors,
+        ),
+        backgroundColor: Theme.of(context).primaryColor,
         splashColor: Colors.white,
       ),
     );

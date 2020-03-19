@@ -3,7 +3,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 import 'package:intl/intl.dart';
 
-
 class DailyPieChart extends StatefulWidget {
   final DateTime dayRepresentation;
 
@@ -15,7 +14,7 @@ class DailyPieChart extends StatefulWidget {
 class _DailyPieChart extends State<DailyPieChart> {
   final GlobalKey<AnimatedCircularChartState> _chartKey =
       new GlobalKey<AnimatedCircularChartState>();
-      
+
   var _chartSize;
 
   double value = 50.0;
@@ -24,15 +23,14 @@ class _DailyPieChart extends State<DailyPieChart> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _chartSize =  Size(400.0,400.0);
+    _chartSize = Size(400.0, 400.0);
   }
+
   @override
-  didUpdateWidget(oldWidget){
+  didUpdateWidget(oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if(widget.dayRepresentation != oldWidget.dayRepresentation){
-      setState(() {
-        
-      });
+    if (widget.dayRepresentation != oldWidget.dayRepresentation) {
+      setState(() {});
     }
   }
 
@@ -58,7 +56,6 @@ class _DailyPieChart extends State<DailyPieChart> {
         ],
         rankKey: 'percentage',
       ),
-      
     ];
 
     return data;
@@ -68,7 +65,9 @@ class _DailyPieChart extends State<DailyPieChart> {
   Widget build(BuildContext context) {
     TextStyle _labelStyle = Theme.of(context).textTheme.title.merge(
         new TextStyle(
-            color: Colors.black,
+            color: Theme.of(context).brightness == Brightness.light
+                ? Colors.black38
+                : Colors.white38,
             fontStyle: FontStyle.italic,
             fontWeight: FontWeight.w100));
 

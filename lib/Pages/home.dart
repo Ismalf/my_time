@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:my_time/Pages/Widgets/daily_pie_chart.dart';
 
 class MyTimeHomePage extends StatefulWidget {
@@ -68,13 +69,22 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    /* SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: Theme.of(context).primaryColor,
+        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.dark)); */
+
+    var _appbarcolors = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black;
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
+        brightness: Brightness.dark,
         iconTheme: IconThemeData(
-          color: Colors.black,
+          color: _appbarcolors,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).primaryColor,
         actions: <Widget>[
           PopupMenuButton(
             icon: Icon(Icons.list),
@@ -109,7 +119,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
               'My',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: _appbarcolors,
                 fontSize: 25.0,
               ),
             ),
@@ -120,7 +130,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
               'Time',
               style: TextStyle(
                   fontWeight: FontWeight.normal,
-                  color: Colors.black38,
+                  color: _appbarcolors,
                   fontSize: 25.0,
                   fontStyle: FontStyle.italic),
             ),
@@ -211,8 +221,11 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _newActivity,
         tooltip: 'Increment',
-        child: Icon(Icons.add),
-        backgroundColor: Colors.white,
+        child: Icon(
+          Icons.add,
+          color: _appbarcolors,
+        ),
+        backgroundColor: Theme.of(context).primaryColor,
         splashColor: Colors.white,
       ),
     );
@@ -240,8 +253,8 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
           ),
         );
         _days.add(w);
-      } 
-      if(i+2==_days.length - 1){
+      }
+      if (i + 2 == _days.length - 1) {
         _days.removeLast();
       }
     });

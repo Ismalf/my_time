@@ -9,13 +9,14 @@ class MyApp extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Colors.white));
+    
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.grey,
-        fontFamily: 'Ubuntu'
+        fontFamily: 'Ubuntu',
+        brightness: Brightness.dark
       ),
       initialRoute: '/',
       routes: appRoutes,
