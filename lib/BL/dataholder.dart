@@ -21,13 +21,36 @@ class StateContainer extends StatefulWidget {
 class StateContainerState extends State<StateContainer> {
   DailySetList _sets;
 
+  List<int> _keys = [];
+
   /// have a copy of the todayset
   /// which must be accesible all time
   DailySet _todaySet;
 
+  void setTodaySet(DailySet x) => _todaySet = x;
+
+  DailySet getTodaySet() => this._todaySet;
+
+  void addKey(int key) {
+    _keys.add(key);
+  }
+
   /// Read data from DB
   void loadData() async {
     // execute db read
+  }
+
+  /// As the activity list reorders, so must do the activity list
+  void updateTaskOrder(Task task, int currentindex, int newindex) {
+    _todaySet.tasks.removeAt(currentindex);
+    _todaySet.tasks.insert(newindex, task);
+    // TODO update on db
+  }
+
+  updateDailySet(DailySet ds) {
+    setState(() {
+      this._todaySet = ds;
+    });
   }
 
   /// Get a date-specific set of tasks

@@ -1,7 +1,11 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:my_time/BL/dataholder.dart';
+import 'package:my_time/Data/Models/activity_model.dart';
 
 class DailyPieChart extends StatefulWidget {
   final DateTime dayRepresentation;
@@ -34,30 +38,47 @@ class _DailyPieChart extends State<DailyPieChart> {
     }
   }
 
-  List<CircularStackEntry> _generateChartData(double value) {
-    List<CircularStackEntry> data = <CircularStackEntry>[
-      new CircularStackEntry(
-        <CircularSegmentEntry>[
-          new CircularSegmentEntry(
-            10,
-            Colors.teal,
-            rankKey: 'completed',
-          ),
-          new CircularSegmentEntry(
-            50,
-            Colors.green,
-            rankKey: 'remain',
-          ),
-          new CircularSegmentEntry(
-            100,
-            Colors.grey[200],
-            rankKey: 'left',
-          )
-        ],
-        rankKey: 'percentage',
-      ),
-    ];
+  double _calculatePercentage(TimeOfDay taskTime) {
+    const minsPerDay = 24 * 60;
+    var minsPerTask = taskTime.minute + taskTime.hour * 60;
 
+    return (minsPerTask / minsPerDay) * 100;
+  }
+
+  List<CircularStackEntry> _generateChartData(double value) {
+    List<Task> tasks = StateContainer.of(context).getTodaySet()?.tasks ?? [];
+    List<CircularStackEntry> data = <CircularStackEntry>[];
+    if (tasks?.length == 0)
+      data.add(
+        new CircularStackEntry(
+          <CircularSegmentEntry>[
+            new CircularSegmentEntry(
+              100,
+              Colors.grey[200],
+              rankKey: 'left',
+            )
+          ],
+          rankKey: 'percentage',
+        ),
+      );
+    else {
+      var entries = <CircularSegmentEntry>[];
+      tasks.forEach(
+        (task) => entries.add(
+          new CircularSegmentEntry(
+            _calculatePercentage(task.timeForTask),
+            task.taskColor,
+            rankKey: task.name,
+          ),
+        ),
+      );
+      data.add(
+        new CircularStackEntry(
+          entries,
+          rankKey: 'percentage',
+        ),
+      );
+    }
     return data;
   }
 

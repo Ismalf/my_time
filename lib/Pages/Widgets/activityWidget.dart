@@ -8,21 +8,21 @@ import 'package:my_time/Pages/Widgets/timeIndicator.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 
 class ActivityWidget extends StatefulWidget {
-  
   final Task task;
   final Key key;
-  ActivityWidget(this.task, {this.key});
-  
+  final ValueChanged<Task> onChanged;
+  final expanded;
+  ActivityWidget(this.task, {this.key, this.onChanged, this.expanded});
+
   @override
   _ActivityWidget createState() => _ActivityWidget(this.task);
 }
 
 class _ActivityWidget extends State<ActivityWidget> {
-
   _ActivityWidget(this._task);
 
   ///TASK CLASS VARIABLES
-  
+
   Task _task;
 
   ///WIDGET VARIABLES
@@ -55,7 +55,7 @@ class _ActivityWidget extends State<ActivityWidget> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    _expanded = widget.expanded ?? false;
     //Build data at the construction of the widget
     _buildReminderModalPickerData();
     //load from DB
@@ -79,13 +79,14 @@ class _ActivityWidget extends State<ActivityWidget> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
+    widget.onChanged(_task);
     setState(() => _mainctx = context);
     var hour = _task.timeForTask?.hour ?? 0;
     var minute = _task.timeForTask?.minute ?? 0;
     return ExpansionTile(
       leading: _expanded ? Icon(Icons.expand_less) : Icon(Icons.expand_more),
       title: Text(_task.name),
-      initiallyExpanded: false,
+      initiallyExpanded: widget.expanded ?? false,
       onExpansionChanged: (changed) {
         setState(() {
           _expanded = changed;
@@ -413,7 +414,8 @@ class _ActivityWidget extends State<ActivityWidget> {
                 _task.hasAlarm
                     ? AnimatedOpacity(
                         opacity: _alarmOpacity,
-                        duration: Duration(milliseconds: _task.hasAlarm ? 450 : 50),
+                        duration:
+                            Duration(milliseconds: _task.hasAlarm ? 450 : 50),
                         child: Padding(
                           padding: EdgeInsets.all(15.0),
                           child: Row(
@@ -450,7 +452,8 @@ class _ActivityWidget extends State<ActivityWidget> {
                                                 : Text(
                                                     DateFormat(
                                                           'EEE d, MMMM yyyy',
-                                                        ).format(_task.reminder) +
+                                                        ).format(
+                                                            _task.reminder) +
                                                         ' ' +
                                                         TimeOfDay.fromDateTime(
                                                                 _task.reminder)
@@ -488,8 +491,8 @@ class _ActivityWidget extends State<ActivityWidget> {
                                     : IconButton(
                                         color: _hasColor(),
                                         icon: Icon(Icons.clear),
-                                        onPressed: () =>
-                                            setState(() => _task.reminder = null),
+                                        onPressed: () => setState(
+                                            () => _task.reminder = null),
                                       ),
                               ),
                             ],
@@ -532,8 +535,8 @@ class _ActivityWidget extends State<ActivityWidget> {
                         child: Column(
                           children: <Widget>[
                             AnimatedOpacity(
-                              duration:
-                                  Duration(milliseconds: !_task.hasPlan ? 500 : 150),
+                              duration: Duration(
+                                  milliseconds: !_task.hasPlan ? 500 : 150),
                               opacity: _startDatePhOpacity,
                               child: Row(
                                 mainAxisAlignment:
@@ -602,8 +605,8 @@ class _ActivityWidget extends State<ActivityWidget> {
                               ),
                             ),
                             AnimatedOpacity(
-                              duration:
-                                  Duration(milliseconds: !_task.hasPlan ? 500 : 100),
+                              duration: Duration(
+                                  milliseconds: !_task.hasPlan ? 500 : 100),
                               opacity: _dueDatePhOpacity,
                               child: Row(
                                 mainAxisAlignment:
@@ -679,8 +682,8 @@ class _ActivityWidget extends State<ActivityWidget> {
                             ),
                             AnimatedOpacity(
                               opacity: _timeAvailablePhOpacity,
-                              duration:
-                                  Duration(milliseconds: !_task.hasPlan ? 500 : 50),
+                              duration: Duration(
+                                  milliseconds: !_task.hasPlan ? 500 : 50),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -697,7 +700,8 @@ class _ActivityWidget extends State<ActivityWidget> {
                                     activeColor: _hasColor(),
                                     onChanged: (active) => setState(() {
                                       _task.hasDailyReminder = active;
-                                      if (_task.hasDailyReminder) _forceReminder();
+                                      if (_task.hasDailyReminder)
+                                        _forceReminder();
                                     }),
                                   ),
                                 ],
@@ -956,15 +960,16 @@ class _ActivityWidget extends State<ActivityWidget> {
     if (!_task.hasAlarm) {
       setState(() {
         _showReminderSettings();
-        _showReminderModal(context, startDate: _task.startDate, dueDate: _task.dueDate);
+        _showReminderModal(context,
+            startDate: _task.startDate, dueDate: _task.dueDate);
       });
     }
   }
 
   _hideReminderSettings() {
     _alarmOpacity = _alarmOpacity == 0.0 ? 1.0 : 0.0;
-    Future.delayed(
-        Duration(milliseconds: 100), () => setState(() => _task.hasAlarm = false));
+    Future.delayed(Duration(milliseconds: 100),
+        () => setState(() => _task.hasAlarm = false));
   }
 
   _showReminderSettings() {

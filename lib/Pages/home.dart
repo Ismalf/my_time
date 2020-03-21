@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
+import 'package:my_time/BL/dataholder.dart';
+import 'package:my_time/Data/Daos/dailySet_dao.dart';
+import 'package:my_time/Data/Models/daily_set.dart';
 import 'package:my_time/Pages/Widgets/daily_pie_chart.dart';
 
 class MyTimeHomePage extends StatefulWidget {
@@ -14,6 +18,8 @@ class MyTimeHomePage extends StatefulWidget {
 
 class _MyTimeHomePageState extends State<MyTimeHomePage> {
   List<Widget> _days = [];
+
+  IconData _homeView = Icons.donut_large;
 
   /// Identifiers for a maximum of three days contained on the array
   ///
@@ -87,7 +93,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
         backgroundColor: Theme.of(context).primaryColor,
         actions: <Widget>[
           PopupMenuButton(
-            icon: Icon(Icons.list),
+            icon: Icon(_homeView),
             itemBuilder: (context) => [
               PopupMenuItem(
                 child: Row(
@@ -98,6 +104,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
                     Icon(Icons.donut_large),
                   ],
                 ),
+                value: 'd',
               ),
               PopupMenuItem(
                 child: Row(
@@ -108,10 +115,13 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
                     Icon(Icons.equalizer),
                   ],
                 ),
+                value: 'w',
               ),
             ],
+            onSelected: (e) => setState(() =>
+                _homeView = e == 'w' ? Icons.equalizer : Icons.donut_large),
           ),
-          IconButton(icon: Icon(Icons.payment), onPressed: null),
+          IconButton(icon: Icon(Icons.help_outline), onPressed: null),
         ],
         title: Row(
           children: <Widget>[
@@ -182,38 +192,86 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
               ],
               mainAxisAlignment: MainAxisAlignment.center,
             ),
-            GestureDetector(
-              child: ListView.builder(
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    ///TODO implement activity list widget for homepage
-                    title: Text('Activity $index for today'),
-                    trailing: Container(
-                      width: 150.0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text('9h'),
-                          SizedBox(
-                            width: 25.0,
-                          ),
-                          Container(
-                            height: 15.0,
-                            width: 15.0,
-                            color: Colors.green,
-                          ),
-                        ],
-                      ),
+            FutureBuilder(
+              future: DailySetDao().getDaySet(_today),
+              builder: (context, snapshot) {
+                if (snapshot.error != null) {
+                  return Center(
+                    child: Text(
+                      'Something went wrong :(',
+                      style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white54
+                              : Colors.black54),
                     ),
                   );
-                },
-                itemCount: 5,
-                shrinkWrap: true,
-                scrollDirection: Axis.vertical,
-                physics: NeverScrollableScrollPhysics(),
-              ),
-              onTap: () => Navigator.of(context).pushNamed('/activity_detail'),
+                }
+
+                switch (snapshot.connectionState) {
+                  case ConnectionState.active:
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  case ConnectionState.waiting:
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  case ConnectionState.done:
+                    DailySet x = snapshot.data;
+                    StateContainer.of(context).setTodaySet(x);
+                    print(x.tasks);
+                    return GestureDetector(
+                      child: x.tasks.length == 0
+                          ? Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: Text('Tap the + button to add a task',
+                                    style: TextStyle(color: _appbarcolors)),
+                              ),
+                            )
+                          : ListView.builder(
+                              itemBuilder: (context, index) {
+                                return ListTile(
+                                  ///TODO implement activity list widget for homepage
+                                  title: Text('${x.tasks[index].name}'),
+                                  trailing: Container(
+                                    width: 150.0,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Text(
+                                            '${x.tasks[index].timeForTask.format(context)}'),
+                                        SizedBox(
+                                          width: 25.0,
+                                        ),
+                                        CircleColor(
+                                          circleSize: 10.0,
+                                          color: x.tasks[index].taskColor,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                              itemCount: x.tasks.length,
+                              shrinkWrap: true,
+                              scrollDirection: Axis.vertical,
+                              physics: NeverScrollableScrollPhysics(),
+                            ),
+                      onTap: () => x.tasks.length == 0
+                          ? _newActivity()
+                          : Navigator.of(context).pushNamed('/activity_detail'),
+                    );
+                  case ConnectionState.none:
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  default:
+                    return Container();
+                }
+              },
             ),
           ],
         ),
@@ -233,6 +291,8 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
 
   _newActivity() {
     ///TODO implement new activity page: home page
+
+    Navigator.of(context).pushNamed('/new_activity');
   }
 
   _calculatedayslist(int i) {

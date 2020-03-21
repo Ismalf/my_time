@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:my_time/Data/Models/activity_model.dart';
 
+part 'daily_set.g.dart';
 
 /// A Daily set of activities, this class holds
 /// a specific list of 'tasks' or 'activities'
@@ -14,18 +15,32 @@ class DailySet{
 
   DailySet({this.day, this.tasks});
 
+  factory DailySet.fromJson(Map<String, dynamic> json) => _$DailySetFromJson(json);
+
+  /// `toJson` is the convention for a class to declare support for serialization
+  /// to JSON. The implementation simply calls the private, generated
+  /// helper method `_$UserToJson`.
+  Map<String, dynamic> toJson() => _$DailySetToJson(this);
+
 }
 
 
 /// Helper class meant to hold all the sets loaded
 /// from the db
-/// 
-/// 
+
+
 @JsonSerializable(explicitToJson: true)
 class DailySetList{
   
   List<DailySet> dailysets;
 
   DailySetList({this.dailysets});
+
+  factory DailySetList.fromJson(Map<String, dynamic> json) => _$DailySetListFromJson(json);
+
+  /// `toJson` is the convention for a class to declare support for serialization
+  /// to JSON. The implementation simply calls the private, generated
+  /// helper method `_$UserToJson`.
+  Map<String, dynamic> toJson() => _$DailySetListToJson(this);
 
 }
