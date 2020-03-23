@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:my_time/BL/common.dart';
+import 'package:my_time/Data/Daos/dailySet_dao.dart';
 import 'package:my_time/Data/Models/activity_model.dart';
 import 'package:my_time/Data/Models/daily_set.dart';
 
@@ -21,23 +23,92 @@ class StateContainer extends StatefulWidget {
 class StateContainerState extends State<StateContainer> {
   DailySetList _sets;
 
-  List<int> _keys = [];
+  List<Map<int, DailySet>> _keys = [];
 
   /// have a copy of the todayset
   /// which must be accesible all time
   DailySet _todaySet;
+  DailySet _yesterdaySet;
+  DailySet _tomorrowSet;
 
-  void setTodaySet(DailySet x) => _todaySet = x;
+  void setTodaySet(DailySet x) {
+    //if (_todaySet == null)
+    _todaySet = x;
+    // else
+    //  _updateSet(x, _todaySet);
+  }
 
-  DailySet getTodaySet() => this._todaySet;
+  void setYesterdaySet(DailySet x) {
+    //if (_yesterdaySet == null)
+    _yesterdaySet = x;
+    //else
+//_updateSet(x, _yesterdaySet);
+  }
 
-  void addKey(int key) {
+  void setTomorrowSet(DailySet x) {
+    //if (_tomorrowSet == null)
+    _tomorrowSet = x;
+    //else
+    // _updateSet(x, _tomorrowSet);
+  }
+
+  _updateSet(DailySet _new, DailySet _old) {
+    if (Commons().compareDates(_new.day, _old.day))
+      _updateTask(_new.tasks, _old.tasks);
+    else
+      _old = _new;
+  }
+
+  _updateTask(_newT, _oldT) {
+    _oldT = _newT;
+  }
+
+  DailySet getTodaySet() {
+    return this._todaySet;
+  }
+
+  DailySet getYesterdaySet() {
+    return this._yesterdaySet;
+  }
+
+  DailySet getTomorrowSet() {
+    return this._tomorrowSet;
+  }
+
+  void addKey(var key) {
     _keys.add(key);
   }
 
+  bool isLoaded() {
+    return this._sets == null;
+  }
+
+  void addTask(task, date) {
+    print(getTodaySet().day.toString());
+    setState(() => _sets.dailysets
+        .firstWhere((s) => Commons().compareDates(s.day, date))
+        .tasks
+        .add(task));
+  }
+
   /// Read data from DB
-  void loadData() async {
+  Future<DailySetList> loadData() async {
     // execute db read
+    _sets = await DailySetDao().getAllData();
+    _setValues(_sets);
+    return _sets;
+  }
+
+  _setValues(DailySetList _sets) {
+    var _today = DateTime.now();
+    var _yesterday = _today.add(Duration(days: -1));
+    var _tomorrow = _today.add(Duration(days: 1));
+
+    setTodaySet(loadSet(_today));
+
+    setYesterdaySet(loadSet(_yesterday));
+
+    setTomorrowSet(loadSet(_tomorrow));
   }
 
   /// As the activity list reorders, so must do the activity list
@@ -58,11 +129,14 @@ class StateContainerState extends State<StateContainer> {
     var _set;
     try {
       // search the sets for a set matching the correspondig date
-      _set = _sets.dailysets.firstWhere((dSet) => dSet.day == day);
+      _set = _sets.dailysets
+          .firstWhere((dSet) => Commons().compareDates(dSet.day, day));
     } catch (_) {
       // as the firstWhere method throws an error if no match is found
       // catch it and make a new set with the corresponding date
       _set = DailySet(day: day, tasks: []);
+      DailySetDao().insert(_set);
+      _sets.dailysets.add(_set);
     }
     return _set;
   }

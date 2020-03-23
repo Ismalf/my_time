@@ -1,3 +1,8 @@
+import 'dart:convert';
+
+import 'package:flutter/cupertino.dart';
+import 'package:my_time/BL/common.dart';
+import 'package:my_time/BL/dataholder.dart';
 import 'package:my_time/Data/Models/activity_model.dart';
 import 'package:my_time/Data/Models/daily_set.dart';
 import 'package:sembast/sembast.dart';
@@ -13,6 +18,7 @@ class DailySetDao {
   Future insert(DailySet t) async {
     print('insert');
     print(t.toJson());
+    
     return await _taskStor.add(await _db, t.toJson());
   }
 
@@ -32,8 +38,10 @@ class DailySetDao {
   }
 
   Future<DailySetList> getAllData() async {
-    final record = await _taskStor.findFirst(await _db);
-    return DailySetList.fromJson(record.value);
+    final record = await _taskStor.find(await _db);
+    List values = [];
+    record.forEach((map) => values.add(map.value));
+    return DailySetList.fromJson(values);
   }
 
   Future getDaySet(DateTime day) async {
@@ -41,7 +49,7 @@ class DailySetDao {
       filter: Filter.custom(
         (snapshot) {
           var x = snapshot.value.day as DateTime;
-          return x.day == day.day && x.month == day.month && x.year == day.year;
+          return Commons().compareDates(x, day);
         },
       ),
     );

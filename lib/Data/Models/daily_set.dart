@@ -29,18 +29,23 @@ class DailySet{
 /// from the db
 
 
-@JsonSerializable(explicitToJson: true)
+
 class DailySetList{
   
   List<DailySet> dailysets;
 
   DailySetList({this.dailysets});
 
-  factory DailySetList.fromJson(Map<String, dynamic> json) => _$DailySetListFromJson(json);
+  factory DailySetList.fromJson(List<dynamic> json) {
+    return DailySetList(
+        dailysets: json
+            .map((e) => DailySet.fromJson(e as Map<String, dynamic>))
+            .toList());
+  }
 
   /// `toJson` is the convention for a class to declare support for serialization
   /// to JSON. The implementation simply calls the private, generated
   /// helper method `_$UserToJson`.
-  Map<String, dynamic> toJson() => _$DailySetListToJson(this);
+  //Map<String, dynamic> toJson() => _$DailySetListToJson(this);
 
 }

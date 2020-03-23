@@ -62,9 +62,8 @@ class _NewActivity extends State<NewActivity> {
   }
 
   _save() {
-    setState(() => _ds.tasks.add(_task));
-    StateContainer.of(context).updateDailySet(_ds);
-    Navigator.of(context).pop();
+    StateContainer.of(context).addTask(_task, _ds.day);
+    Navigator.of(context).pop(_ds);
   }
 
   void _updateTask(Task task) {

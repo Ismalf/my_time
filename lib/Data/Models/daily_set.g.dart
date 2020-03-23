@@ -20,17 +20,3 @@ Map<String, dynamic> _$DailySetToJson(DailySet instance) => <String, dynamic>{
       'day': instance.day?.toIso8601String(),
       'tasks': instance.tasks?.map((e) => e?.toJson())?.toList(),
     };
-
-DailySetList _$DailySetListFromJson(Map<String, dynamic> json) {
-  return DailySetList(
-    dailysets: (json['dailysets'] as List)
-        ?.map((e) =>
-            e == null ? null : DailySet.fromJson(e as Map<String, dynamic>))
-        ?.toList(),
-  );
-}
-
-Map<String, dynamic> _$DailySetListToJson(DailySetList instance) =>
-    <String, dynamic>{
-      'dailysets': instance.dailysets?.map((e) => e?.toJson())?.toList(),
-    };

@@ -6,9 +6,10 @@ import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:my_time/BL/dataholder.dart';
 import 'package:my_time/Data/Models/activity_model.dart';
+import 'package:my_time/Data/Models/daily_set.dart';
 
 class DailyPieChart extends StatefulWidget {
-  final DateTime dayRepresentation;
+  final DailySet dayRepresentation;
 
   const DailyPieChart({Key key, this.dayRepresentation}) : super(key: key);
   @override
@@ -33,9 +34,9 @@ class _DailyPieChart extends State<DailyPieChart> {
   @override
   didUpdateWidget(oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.dayRepresentation != oldWidget.dayRepresentation) {
-      setState(() {});
-    }
+
+    print('should update');
+    
   }
 
   double _calculatePercentage(TimeOfDay taskTime) {
@@ -46,7 +47,7 @@ class _DailyPieChart extends State<DailyPieChart> {
   }
 
   List<CircularStackEntry> _generateChartData(double value) {
-    List<Task> tasks = StateContainer.of(context).getTodaySet()?.tasks ?? [];
+    List<Task> tasks = widget.dayRepresentation.tasks ?? [];
     List<CircularStackEntry> data = <CircularStackEntry>[];
     if (tasks?.length == 0)
       data.add(
@@ -93,7 +94,7 @@ class _DailyPieChart extends State<DailyPieChart> {
             fontWeight: FontWeight.w100));
 
     var formated =
-        DateFormat('EEE d, MMMM yyyy').format(widget.dayRepresentation);
+        DateFormat('EEE d, MMMM yyyy').format(widget.dayRepresentation.day);
 
     return new GestureDetector(
       child: new AnimatedCircularChart(
@@ -107,7 +108,7 @@ class _DailyPieChart extends State<DailyPieChart> {
         labelStyle: _labelStyle,
         duration: Duration(milliseconds: 1500),
       ),
-      onTap: () => print('tap'),
+      onTap: () => print(widget.dayRepresentation.tasks.length),
     );
   }
 }

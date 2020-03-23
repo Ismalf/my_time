@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 class Commons {
+  ///Returns true if it's the same date
+  bool compareDates(DateTime x, DateTime y){
+    return x.day == y.day && x.month == y.month && x.year == y.year;
+  }
+
   Future<bool> confirmCancel(context, title, content, accept, cancel) async {
     var response;
     await showDialog<bool>(
