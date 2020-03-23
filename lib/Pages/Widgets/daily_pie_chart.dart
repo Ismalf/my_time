@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
@@ -9,26 +10,35 @@ import 'package:my_time/Data/Models/activity_model.dart';
 import 'package:my_time/Data/Models/daily_set.dart';
 
 class DailyPieChart extends StatefulWidget {
-  final DailySet dayRepresentation;
-
-  const DailyPieChart({Key key, this.dayRepresentation}) : super(key: key);
+  final Stream taskController;
+  final DailySet initData;
+  const DailyPieChart({Key key, this.taskController, this.initData})
+      : super(key: key);
   @override
   _DailyPieChart createState() => _DailyPieChart();
 }
 
 class _DailyPieChart extends State<DailyPieChart> {
-  final GlobalKey<AnimatedCircularChartState> _chartKey =
+  GlobalKey<AnimatedCircularChartState> _chartKey =
       new GlobalKey<AnimatedCircularChartState>();
 
   var _chartSize;
 
-  double value = 50.0;
+  var value;
+  var initdata;
   Color labelColor = Colors.blue[200];
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _chartSize = Size(400.0, 400.0);
+    initdata = widget.initData;
+    print(widget.taskController.listen((data) {
+      setState(() {
+        this.initdata = data;
+      });
+      print(data);
+    }));
   }
 
   @override
@@ -36,7 +46,6 @@ class _DailyPieChart extends State<DailyPieChart> {
     super.didUpdateWidget(oldWidget);
 
     print('should update');
-    
   }
 
   double _calculatePercentage(TimeOfDay taskTime) {
@@ -46,8 +55,8 @@ class _DailyPieChart extends State<DailyPieChart> {
     return (minsPerTask / minsPerDay) * 100;
   }
 
-  List<CircularStackEntry> _generateChartData(double value) {
-    List<Task> tasks = widget.dayRepresentation.tasks ?? [];
+  List<CircularStackEntry> _generateChartData(DailySet value) {
+    List<Task> tasks = value.tasks ?? [];
     List<CircularStackEntry> data = <CircularStackEntry>[];
     if (tasks?.length == 0)
       data.add(
@@ -55,8 +64,8 @@ class _DailyPieChart extends State<DailyPieChart> {
           <CircularSegmentEntry>[
             new CircularSegmentEntry(
               100,
-              Colors.grey[200],
-              rankKey: 'left',
+              Colors.white10,
+              rankKey: '_fill',
             )
           ],
           rankKey: 'percentage',
@@ -71,6 +80,13 @@ class _DailyPieChart extends State<DailyPieChart> {
             task.taskColor,
             rankKey: task.name,
           ),
+        ),
+      );
+      entries.add(
+        new CircularSegmentEntry(
+          100.0,
+          Colors.white10,
+          rankKey: '_fill',
         ),
       );
       data.add(
@@ -93,22 +109,64 @@ class _DailyPieChart extends State<DailyPieChart> {
             fontStyle: FontStyle.italic,
             fontWeight: FontWeight.w100));
 
-    var formated =
-        DateFormat('EEE d, MMMM yyyy').format(widget.dayRepresentation.day);
-
-    return new GestureDetector(
-      child: new AnimatedCircularChart(
-        key: _chartKey,
-        size: _chartSize,
-        initialChartData: _generateChartData(value),
-        chartType: CircularChartType.Radial,
-        edgeStyle: SegmentEdgeStyle.flat,
-        percentageValues: true,
-        holeLabel: formated,
-        labelStyle: _labelStyle,
-        duration: Duration(milliseconds: 1500),
-      ),
-      onTap: () => print(widget.dayRepresentation.tasks.length),
+    return StreamBuilder(
+      builder: (context, snapshot) {
+        if (snapshot.error != null)
+          return Center(child: Text('Something went wrong :c'));
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            return Container();
+          case ConnectionState.waiting:
+            value = snapshot.data;
+            _chartKey = new GlobalKey<AnimatedCircularChartState>();
+            print('waiting');
+            print(value);
+            return new AnimatedCircularChart(
+              key: _chartKey,
+              size: _chartSize,
+              initialChartData: _generateChartData(value),
+              chartType: CircularChartType.Radial,
+              edgeStyle: SegmentEdgeStyle.flat,
+              percentageValues: true,
+              holeLabel: DateFormat('EEE d, MMMM yyyy').format(value.day),
+              labelStyle: _labelStyle,
+              duration: Duration(milliseconds: 1500),
+            );
+          case ConnectionState.active:
+            value = snapshot.data;
+            _chartKey = new GlobalKey<AnimatedCircularChartState>();
+            print('active');
+            print(value);
+            return new AnimatedCircularChart(
+              key: _chartKey,
+              size: _chartSize,
+              initialChartData: _generateChartData(value),
+              chartType: CircularChartType.Radial,
+              edgeStyle: SegmentEdgeStyle.flat,
+              percentageValues: true,
+              holeLabel: DateFormat('EEE d, MMMM yyyy').format(value.day),
+              labelStyle: _labelStyle,
+              duration: Duration(milliseconds: 1500),
+            );
+          case ConnectionState.done:
+            var value = snapshot.data;
+            return new AnimatedCircularChart(
+              key: _chartKey,
+              size: _chartSize,
+              initialChartData: _generateChartData(value),
+              chartType: CircularChartType.Radial,
+              edgeStyle: SegmentEdgeStyle.flat,
+              percentageValues: true,
+              holeLabel: DateFormat('EEE d, MMMM yyyy').format(value.day),
+              labelStyle: _labelStyle,
+              duration: Duration(milliseconds: 1500),
+            );
+          default:
+            return CircularProgressIndicator();
+        }
+      },
+      initialData: initdata,
+      stream: widget.taskController,
     );
   }
 }

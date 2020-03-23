@@ -72,6 +72,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
 
   Widget _activitiesList(x, _appbarcolors) {
     print(x.tasks);
+
     return GestureDetector(
       child: x.tasks.length == 0
           ? Center(
@@ -83,6 +84,10 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
             )
           : ListView.builder(
               itemBuilder: (context, index) {
+                dynamic hour = x.tasks[index].timeForTask.hour;
+                dynamic minute = x.tasks[index].timeForTask.minute;
+                hour = hour < 10 ? '0$hour' : '$hour';
+                minute = minute < 10 ? '0$minute' : '$minute';
                 return ListTile(
                   ///TODO implement activity list widget for homepage
                   title: Text('${x.tasks[index].name}'),
@@ -92,8 +97,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        Text(
-                            '${x.tasks[index].timeForTask.hour}:${x.tasks[index].timeForTask.minute}'),
+                        Text('$hour:$minute'),
                         SizedBox(
                           width: 25.0,
                         ),
@@ -133,19 +137,24 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
       currentIndex = 1;
       _days.add(
         DailyPieChart(
-          dayRepresentation: _yesterdaySet,
+          taskController:
+              StateContainer.of(context).streamKey(_yesterdaySet).stream,
+          initData: _yesterdaySet,
         ),
       );
     }
 
     _days.add(
       DailyPieChart(
-        dayRepresentation: _todaySet,
+        taskController: StateContainer.of(context).streamKey(_todaySet).stream,
+        initData: _todaySet,
       ),
     );
     _days.add(
       DailyPieChart(
-        dayRepresentation: _tomorrowSet,
+        taskController:
+            StateContainer.of(context).streamKey(_tomorrowSet).stream,
+        initData: _tomorrowSet,
       ),
     );
     setState(() {});
@@ -330,9 +339,10 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
   }
 
   void resetDays() {
-    DailySet _todaySet = StateContainer.of(context).loadSet(_today);
-    DailySet _yesterdaySet = StateContainer.of(context).loadSet(_yesterday);
-    DailySet _tomorrowSet = StateContainer.of(context).loadSet(_tomorrow);
+    var _gData = StateContainer.of(context);
+    DailySet _todaySet = _gData.loadSet(_today);
+    DailySet _yesterdaySet = _gData.loadSet(_yesterday);
+    DailySet _tomorrowSet = _gData.loadSet(_tomorrow);
 
     //if yesteday doesnt had any activity dont show it
     if (_yesterdaySet.tasks.length != 0) {
@@ -340,19 +350,19 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
       currentIndex = 1;
       _days.add(
         DailyPieChart(
-          dayRepresentation: _yesterdaySet,
+          taskController: _gData.streamKey(_yesterdaySet).stream,
         ),
       );
     }
 
     _days.add(
       DailyPieChart(
-        dayRepresentation: _todaySet,
+        taskController: _gData.streamKey(_todaySet).stream,
       ),
     );
     _days.add(
       DailyPieChart(
-        dayRepresentation: _tomorrowSet,
+        taskController: _gData.streamKey(_tomorrowSet).stream,
       ),
     );
     setState(() {});
@@ -362,12 +372,6 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
     ///TODO implement new activity page: home page
 
     dynamic x = await Navigator.of(context).pushNamed('/new_activity');
-    print('reset Days');
-    setState(() {
-      _days.clear();
-      //_days.add(Container());
-    });
-    resetDays();
   }
 
   _calculatedayslist(int i) {
@@ -386,7 +390,8 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
       var tom = _tomorrow;
       if (i == _days.length - 1) {
         Widget w = DailyPieChart(
-          dayRepresentation: _gData.getTomorrowSet(),
+          taskController: _gData.streamKey(_gData.getTomorrowSet()).stream,
+          initData: _gData.getTomorrowSet(),
         );
         _days.add(w);
       }

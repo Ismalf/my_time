@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:my_time/BL/common.dart';
 import 'package:my_time/Data/Daos/dailySet_dao.dart';
@@ -25,6 +28,8 @@ class StateContainerState extends State<StateContainer> {
 
   List<Map<int, DailySet>> _keys = [];
 
+  List<Map<int, StreamController>> _controllers = [];
+
   /// have a copy of the todayset
   /// which must be accesible all time
   DailySet _todaySet;
@@ -32,10 +37,7 @@ class StateContainerState extends State<StateContainer> {
   DailySet _tomorrowSet;
 
   void setTodaySet(DailySet x) {
-    //if (_todaySet == null)
     _todaySet = x;
-    // else
-    //  _updateSet(x, _todaySet);
   }
 
   void setYesterdaySet(DailySet x) {
@@ -85,10 +87,12 @@ class StateContainerState extends State<StateContainer> {
 
   void addTask(task, date) {
     print(getTodaySet().day.toString());
-    setState(() => _sets.dailysets
-        .firstWhere((s) => Commons().compareDates(s.day, date))
-        .tasks
-        .add(task));
+    setState(() {
+      var ds = _sets.dailysets
+          .firstWhere((s) => Commons().compareDates(s.day, date));
+      ds.tasks.add(task);
+      streamKey(ds).add(ds);
+    });
   }
 
   /// Read data from DB
@@ -138,7 +142,29 @@ class StateContainerState extends State<StateContainer> {
       DailySetDao().insert(_set);
       _sets.dailysets.add(_set);
     }
+    _setController(_set);
     return _set;
+  }
+
+  _setController(DailySet _set) {
+    var key = _sets.dailysets.indexOf(_set);
+    var controller;
+    try {
+      controller = _controllers.firstWhere((c) => c.containsKey(key))[key];
+    } catch (_) {
+      controller = new StreamController.broadcast(onListen: ()=>print('listening'));
+      _controllers.add({key: controller});
+    }
+    return controller;
+  }
+
+  StreamController streamKey(DailySet _set) {
+    var key = _sets.dailysets.indexOf(_set);
+    try {
+      return _controllers.firstWhere((c) => c.containsKey(key))[key];
+    } catch (e) {
+      return null;
+    }
   }
 
   void updateSet(DateTime day, List<Task> tasks) {
