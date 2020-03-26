@@ -33,6 +33,7 @@ class _DailyPieChart extends State<DailyPieChart> {
     // TODO: implement initState
     super.initState();
     _chartSize = Size(400.0, 400.0);
+
     initdata = widget.initData;
     print(widget.taskController.listen((data) {
       setState(() {
@@ -121,6 +122,7 @@ class _DailyPieChart extends State<DailyPieChart> {
           case ConnectionState.waiting:
             value = snapshot.data;
             _chartKey = new GlobalKey<AnimatedCircularChartState>();
+
             print('waiting');
             print(value);
             return new AnimatedCircularChart(
@@ -137,6 +139,7 @@ class _DailyPieChart extends State<DailyPieChart> {
           case ConnectionState.active:
             value = snapshot.data;
             _chartKey = new GlobalKey<AnimatedCircularChartState>();
+
             print('active');
             print(value);
             return new AnimatedCircularChart(

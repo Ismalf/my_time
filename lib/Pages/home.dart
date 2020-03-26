@@ -2,11 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
+import 'package:icon_shadow/icon_shadow.dart';
 import 'package:my_time/BL/common.dart';
 import 'package:my_time/BL/dataholder.dart';
 import 'package:my_time/Data/Daos/dailySet_dao.dart';
 import 'package:my_time/Data/Models/daily_set.dart';
 import 'package:my_time/Pages/Widgets/daily_pie_chart.dart';
+import 'package:my_time/custom_icons/custom_icons_icons.dart';
 
 class MyTimeHomePage extends StatefulWidget {
   MyTimeHomePage({Key key, this.title}) : super(key: key);
@@ -140,8 +142,9 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
       currentIndex = 1;
       _days.add(
         DailyPieChart(
-          taskController:
-              StateContainer.of(context).dsStreamController(_yesterdaySet).stream,
+          taskController: StateContainer.of(context)
+              .dsStreamController(_yesterdaySet)
+              .stream,
           initData: _yesterdaySet,
         ),
       );
@@ -149,7 +152,8 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
 
     _days.add(
       DailyPieChart(
-        taskController: StateContainer.of(context).dsStreamController(_todaySet).stream,
+        taskController:
+            StateContainer.of(context).dsStreamController(_todaySet).stream,
         initData: _todaySet,
       ),
     );
@@ -162,6 +166,43 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
     );
     setState(() {});
     return _todaySet;
+  }
+
+  _buildDrawerItems() {
+    return ListView(
+      children: <Widget>[
+        ListTile(
+          leading: Icon(Icons.view_list),
+          title: Text('Pending tasks'),
+        ),
+        ListTile(
+          leading: Icon(Icons.history),
+          title: Text('History'),
+        ),
+        ListTile(
+          leading: Icon(Icons.backup),
+          title: Text('Back up tasks'),
+        ),
+        Divider(),
+        ListTile(
+          leading: IconShadowWidget(
+            Icon(
+              CustomIcons.heart,
+              color: Colors.pinkAccent,
+            ),
+          ),
+          title: Text('Support'),
+        ),
+        ListTile(
+          leading: Icon(Icons.settings),
+          title: Text('Settings'),
+        ),
+        ListTile(
+          leading: Icon(Icons.star_border),
+          title: Text('Rate'),
+        ),
+      ],
+    );
   }
 
   @override
@@ -235,9 +276,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
         ),
       ),
       drawer: Drawer(
-        child: ListView(
-          children: <Widget>[DrawerHeader(child: Text('title'))],
-        ),
+        child: _buildDrawerItems(),
       ),
       body: SafeArea(
         child: StateContainer.of(context).isLoaded()
@@ -341,6 +380,12 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
     );
   }
 
+  _isPastSchedule() {
+    return currentIndex == 0 &&
+        !Commons().compareDates(
+            StateContainer.of(context).getTodaySet().day, DateTime.now());
+  }
+
   void resetDays() {
     var _gData = StateContainer.of(context);
     DailySet _todaySet = _gData.loadSet(_today);
@@ -393,7 +438,8 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
       var tom = _tomorrow;
       if (i == _days.length - 1) {
         Widget w = DailyPieChart(
-          taskController: _gData.dsStreamController(_gData.getTomorrowSet()).stream,
+          taskController:
+              _gData.dsStreamController(_gData.getTomorrowSet()).stream,
           initData: _gData.getTomorrowSet(),
         );
         _days.add(w);

@@ -19,6 +19,8 @@ class ActivityDetail extends StatefulWidget {
 
 class _ActivityDetail extends State<ActivityDetail> {
   List<ActivityWidget> _activities;
+
+  bool _newTask = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -28,7 +30,7 @@ class _ActivityDetail extends State<ActivityDetail> {
 
   _loadTasks() {
     var tasks = StateContainer.of(context).getTodaySet().tasks;
-
+    if(_activities.isNotEmpty) _activities.clear();
     for (var i = 0; i < tasks.length; i++) {
       _activities.add(ActivityWidget(
         tasks[i],
@@ -57,8 +59,9 @@ class _ActivityDetail extends State<ActivityDetail> {
         ? Colors.black
         : Colors.white;
 
-    if (_activities.isEmpty) {
+    if (_activities.isEmpty || _newTask) {
       _loadTasks();
+      _newTask = false;
     }
 
     return Scaffold(
@@ -157,6 +160,11 @@ class _ActivityDetail extends State<ActivityDetail> {
 
   _newActivity() {
     ///TODO implement new activity page
+    setState(() {
+      var tasks = StateContainer.of(context).getTodaySet().tasks;
+      tasks.add(new Task(timeForTask: TimeOfDay(hour: 0, minute: 0)));
+      _newTask = true;
+    });
   }
 
   int _indexOfKey(Key key) {
