@@ -22,6 +22,9 @@ class DailySet{
   /// helper method `_$UserToJson`.
   Map<String, dynamic> toJson() => _$DailySetToJson(this);
 
+  String formatDate(){
+    return '${day.day}.${day.month}.${day.year}';
+  }
 }
 
 

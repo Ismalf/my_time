@@ -26,9 +26,9 @@ class StateContainer extends StatefulWidget {
 class StateContainerState extends State<StateContainer> {
   DailySetList _sets;
 
-  List<Map<int, DailySet>> _keys = [];
+  Map<int, String> _keys = Map();
 
-  List<Map<int, StreamController>> _controllers = [];
+  Map<int, StreamController> _controllers = Map();
 
   /// have a copy of the todayset
   /// which must be accesible all time
@@ -40,29 +40,17 @@ class StateContainerState extends State<StateContainer> {
     _todaySet = x;
   }
 
+  updateDailySet() {
+    var ds = getTodaySet();
+    DailySetDao().updateTask(ds, _getKey(ds));
+  }
+
   void setYesterdaySet(DailySet x) {
-    //if (_yesterdaySet == null)
     _yesterdaySet = x;
-    //else
-//_updateSet(x, _yesterdaySet);
   }
 
   void setTomorrowSet(DailySet x) {
-    //if (_tomorrowSet == null)
     _tomorrowSet = x;
-    //else
-    // _updateSet(x, _tomorrowSet);
-  }
-
-  _updateSet(DailySet _new, DailySet _old) {
-    if (Commons().compareDates(_new.day, _old.day))
-      _updateTask(_new.tasks, _old.tasks);
-    else
-      _old = _new;
-  }
-
-  _updateTask(_newT, _oldT) {
-    _oldT = _newT;
   }
 
   DailySet getTodaySet() {
@@ -77,8 +65,8 @@ class StateContainerState extends State<StateContainer> {
     return this._tomorrowSet;
   }
 
-  void addKey(var key) {
-    _keys.add(key);
+  void addKey(List<MapEntry<int, String>> key) {
+    _keys.addEntries(key);
   }
 
   bool isLoaded() {
@@ -87,18 +75,27 @@ class StateContainerState extends State<StateContainer> {
 
   void addTask(task, date) {
     print(getTodaySet().day.toString());
+    var ds =
+        _sets.dailysets.firstWhere((s) => Commons().compareDates(s.day, date));
     setState(() {
-      var ds = _sets.dailysets
-          .firstWhere((s) => Commons().compareDates(s.day, date));
       ds.tasks.add(task);
-      streamKey(ds).add(ds);
+      //send new DailySet into the stream to update
+      //the corresponding pie chart
+      dsStreamController(ds).add(ds);
     });
+    DailySetDao().updateTask(ds, _getKey(ds));
+  }
+
+  _getKey(ds) {
+    return _keys.keys.firstWhere((m) => _keys[m] == ds.formatDate());
   }
 
   /// Read data from DB
-  Future<DailySetList> loadData() async {
+  Future<DailySetList> loadData(context) async {
     // execute db read
-    _sets = await DailySetDao().getAllData();
+    _sets = await DailySetDao().getAllData(context);
+    //load keys into memory
+
     _setValues(_sets);
     return _sets;
   }
@@ -122,46 +119,48 @@ class StateContainerState extends State<StateContainer> {
     // TODO update on db
   }
 
-  updateDailySet(DailySet ds) {
-    setState(() {
-      this._todaySet = ds;
-    });
-  }
-
   /// Get a date-specific set of tasks
   DailySet loadSet(DateTime day) {
-    var _set;
+    DailySet _set;
     try {
       // search the sets for a set matching the correspondig date
       _set = _sets.dailysets
           .firstWhere((dSet) => Commons().compareDates(dSet.day, day));
+      _setController(_set);
     } catch (_) {
       // as the firstWhere method throws an error if no match is found
       // catch it and make a new set with the corresponding date
       _set = DailySet(day: day, tasks: []);
-      DailySetDao().insert(_set);
+      DailySetDao().insert(_set, context).then((val) {
+        //when new date is finished inserting, set its new controller
+        print(val);
+        _setController(_set);
+      });
+
       _sets.dailysets.add(_set);
     }
-    _setController(_set);
+
     return _set;
   }
 
   _setController(DailySet _set) {
-    var key = _sets.dailysets.indexOf(_set);
     var controller;
-    try {
-      controller = _controllers.firstWhere((c) => c.containsKey(key))[key];
-    } catch (_) {
-      controller = new StreamController.broadcast(onListen: ()=>print('listening'));
-      _controllers.add({key: controller});
+
+    controller = dsStreamController(_set);
+    if (controller == null) {
+      controller =
+          new StreamController.broadcast(onListen: () => print('listening'));
+      var key = _getKey(_set);
+      _controllers.addEntries([MapEntry(key, controller)]);
     }
+
     return controller;
   }
 
-  StreamController streamKey(DailySet _set) {
-    var key = _sets.dailysets.indexOf(_set);
+  StreamController dsStreamController(DailySet _set) {
+    var key = _getKey(_set);
     try {
-      return _controllers.firstWhere((c) => c.containsKey(key))[key];
+      return _controllers[key];
     } catch (e) {
       return null;
     }

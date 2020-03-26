@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:my_time/BL/dataholder.dart';
+import 'package:my_time/Data/Daos/dailySet_dao.dart';
 import 'package:my_time/Data/Models/activity_model.dart';
 import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 
@@ -21,14 +23,31 @@ class _ActivityDetail extends State<ActivityDetail> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _activities = List();
+    _activities = [];
+  }
 
-    for (var i = 0; i < 5; i++) {
+  _loadTasks() {
+    var tasks = StateContainer.of(context).getTodaySet().tasks;
+
+    for (var i = 0; i < tasks.length; i++) {
       _activities.add(ActivityWidget(
-        new Task(),
+        tasks[i],
         key: ValueKey(i),
+        onChanged: (task) => _updateTask(i, task),
       ));
     }
+    setState(() {});
+  }
+
+  _exit() {
+    setState(() {});
+    StateContainer.of(context).updateDailySet();
+    Navigator.of(context).pop();
+  }
+
+  /// current index of task, and new task
+  _updateTask(int index, Task task) {
+    StateContainer.of(context).getTodaySet().tasks[index] = task;
   }
 
   @override
@@ -37,6 +56,10 @@ class _ActivityDetail extends State<ActivityDetail> {
     Color _appbarcolors = Theme.of(context).brightness == Brightness.light
         ? Colors.black
         : Colors.white;
+
+    if (_activities.isEmpty) {
+      _loadTasks();
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -48,8 +71,7 @@ class _ActivityDetail extends State<ActivityDetail> {
             ? Colors.white
             : Theme.of(context).primaryColor,
         leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios),
-            onPressed: () => Navigator.of(context).pop()),
+            icon: Icon(Icons.arrow_back_ios), onPressed: () => _exit()),
         centerTitle: true,
         title: Row(
           children: <Widget>[
@@ -161,6 +183,11 @@ class _ActivityDetail extends State<ActivityDetail> {
   void _reorderDone(Key item) {
     final draggedItem = _activities[_indexOfKey(item)];
     debugPrint("Reordering finished for ${draggedItem.task.name}}");
+    List<Task> tasks = [];
+    //get new list of tasks
+    _activities.forEach((ac) => tasks.add(ac.task));
+    StateContainer.of(context).getTodaySet().tasks = tasks;
+    setState(() {});
   }
 }
 

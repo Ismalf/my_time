@@ -26,6 +26,7 @@ class _DailyPieChart extends State<DailyPieChart> {
 
   var value;
   var initdata;
+  var _duration;
   Color labelColor = Colors.blue[200];
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _DailyPieChart extends State<DailyPieChart> {
       });
       print(data);
     }));
+    _duration = 1000;
   }
 
   @override
@@ -130,7 +132,7 @@ class _DailyPieChart extends State<DailyPieChart> {
               percentageValues: true,
               holeLabel: DateFormat('EEE d, MMMM yyyy').format(value.day),
               labelStyle: _labelStyle,
-              duration: Duration(milliseconds: 1500),
+              duration: Duration(milliseconds: _duration),
             );
           case ConnectionState.active:
             value = snapshot.data;
@@ -146,7 +148,7 @@ class _DailyPieChart extends State<DailyPieChart> {
               percentageValues: true,
               holeLabel: DateFormat('EEE d, MMMM yyyy').format(value.day),
               labelStyle: _labelStyle,
-              duration: Duration(milliseconds: 1500),
+              duration: Duration(milliseconds: _duration),
             );
           case ConnectionState.done:
             var value = snapshot.data;
@@ -159,7 +161,7 @@ class _DailyPieChart extends State<DailyPieChart> {
               percentageValues: true,
               holeLabel: DateFormat('EEE d, MMMM yyyy').format(value.day),
               labelStyle: _labelStyle,
-              duration: Duration(milliseconds: 1500),
+              duration: Duration(milliseconds: _duration),
             );
           default:
             return CircularProgressIndicator();

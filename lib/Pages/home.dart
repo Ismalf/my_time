@@ -126,10 +126,13 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
     //load on memory so it's not neccesary to read from db each time
     //widget is built
 
-    await StateContainer.of(context).loadData();
-    DailySet _todaySet = StateContainer.of(context).loadSet(_today);
-    DailySet _yesterdaySet = StateContainer.of(context).loadSet(_yesterday);
-    DailySet _tomorrowSet = StateContainer.of(context).loadSet(_tomorrow);
+    DailySetList sets = await StateContainer.of(context).loadData(context);
+    DailySet _todaySet = sets.dailysets
+        .firstWhere((ds) => Commons().compareDates(ds.day, _today));
+    DailySet _yesterdaySet = sets.dailysets
+        .firstWhere((ds) => Commons().compareDates(ds.day, _yesterday));
+    DailySet _tomorrowSet = sets.dailysets
+        .firstWhere((ds) => Commons().compareDates(ds.day, _tomorrow));
 
     //if yesteday doesnt had any activity dont show it
     if (_yesterdaySet.tasks.length != 0) {
@@ -138,7 +141,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
       _days.add(
         DailyPieChart(
           taskController:
-              StateContainer.of(context).streamKey(_yesterdaySet).stream,
+              StateContainer.of(context).dsStreamController(_yesterdaySet).stream,
           initData: _yesterdaySet,
         ),
       );
@@ -146,14 +149,14 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
 
     _days.add(
       DailyPieChart(
-        taskController: StateContainer.of(context).streamKey(_todaySet).stream,
+        taskController: StateContainer.of(context).dsStreamController(_todaySet).stream,
         initData: _todaySet,
       ),
     );
     _days.add(
       DailyPieChart(
         taskController:
-            StateContainer.of(context).streamKey(_tomorrowSet).stream,
+            StateContainer.of(context).dsStreamController(_tomorrowSet).stream,
         initData: _tomorrowSet,
       ),
     );
@@ -350,19 +353,19 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
       currentIndex = 1;
       _days.add(
         DailyPieChart(
-          taskController: _gData.streamKey(_yesterdaySet).stream,
+          taskController: _gData.dsStreamController(_yesterdaySet).stream,
         ),
       );
     }
 
     _days.add(
       DailyPieChart(
-        taskController: _gData.streamKey(_todaySet).stream,
+        taskController: _gData.dsStreamController(_todaySet).stream,
       ),
     );
     _days.add(
       DailyPieChart(
-        taskController: _gData.streamKey(_tomorrowSet).stream,
+        taskController: _gData.dsStreamController(_tomorrowSet).stream,
       ),
     );
     setState(() {});
@@ -390,7 +393,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
       var tom = _tomorrow;
       if (i == _days.length - 1) {
         Widget w = DailyPieChart(
-          taskController: _gData.streamKey(_gData.getTomorrowSet()).stream,
+          taskController: _gData.dsStreamController(_gData.getTomorrowSet()).stream,
           initData: _gData.getTomorrowSet(),
         );
         _days.add(w);

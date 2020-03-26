@@ -48,7 +48,7 @@ class Task {
       this.reminder,
       this.startDate,
       this.startDateTime,
-      this.taskColor,
+      this.taskColor = Colors.lightBlue,
       this.timeForTask});
 
   factory Task.fromJson(Map<String, dynamic> json) => _$TaskFromJson(json);

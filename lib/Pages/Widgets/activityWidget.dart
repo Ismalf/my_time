@@ -79,7 +79,7 @@ class _ActivityWidget extends State<ActivityWidget> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    widget.onChanged(_task);
+    if (widget.onChanged != null) widget.onChanged(_task);
     setState(() => _mainctx = context);
     var hour = _task.timeForTask?.hour ?? 0;
     var minute = _task.timeForTask?.minute ?? 0;

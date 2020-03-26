@@ -1,12 +1,7 @@
-import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
 import 'package:my_time/BL/common.dart';
 import 'package:my_time/BL/dataholder.dart';
-import 'package:my_time/Data/Models/activity_model.dart';
 import 'package:my_time/Data/Models/daily_set.dart';
 import 'package:sembast/sembast.dart';
-
 import '../database_controller.dart';
 
 class DailySetDao {
@@ -15,16 +10,19 @@ class DailySetDao {
 
   Future get _db async => await DSDatabaseHelper.instance.db;
 
-  Future insert(DailySet t) async {
+  Future insert(DailySet t, context) async {
     print('insert');
     print(t.toJson());
-    
-    return await _taskStor.add(await _db, t.toJson());
+
+    int key = await _taskStor.add(await _db, t.toJson());
+    StateContainer.of(context).addKey([MapEntry(key, t.formatDate())]);
+    return key;
   }
 
   Future updateTask(DailySet u, int key) async {
     final finder = Finder(filter: Filter.byKey(key));
-    await _taskStor.update(await _db, u.toJson(), finder: finder);
+    var x = await _taskStor.update(await _db, u.toJson(), finder: finder);
+    print(x);
   }
 
   Future<bool> delete(int key) async {
@@ -37,10 +35,18 @@ class DailySetDao {
     return true;
   }
 
-  Future<DailySetList> getAllData() async {
+  Future<DailySetList> getAllData(context) async {
     final record = await _taskStor.find(await _db);
     List values = [];
-    record.forEach((map) => values.add(map.value));
+    List<MapEntry<int, String>> _entries = [];
+    record.forEach((map) {
+      //add the respective keys to key array
+      var ds = DailySet.fromJson(map.value);
+      _entries.add(MapEntry(map.key, ds.formatDate()));
+      values.add(map.value);
+    });
+    StateContainer.of(context).addKey(_entries);
+    //build and return the complete list of sets
     return DailySetList.fromJson(values);
   }
 
