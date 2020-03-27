@@ -30,7 +30,7 @@ class _ActivityDetail extends State<ActivityDetail> {
 
   _loadTasks() {
     var tasks = StateContainer.of(context).getTodaySet().tasks;
-    if(_activities.isNotEmpty) _activities.clear();
+    if (_activities.isNotEmpty) _activities.clear();
     for (var i = 0; i < tasks.length; i++) {
       _activities.add(ActivityWidget(
         tasks[i],
@@ -63,16 +63,18 @@ class _ActivityDetail extends State<ActivityDetail> {
       _loadTasks();
       _newTask = false;
     }
-
+    var _gData = StateContainer.of(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
+        brightness:
+            _gData.getSettings().isDark() ? Brightness.dark : Brightness.light,
+        backgroundColor: _gData.getSettings().isDark()
+            ? Theme.of(context).primaryColor
+            : Colors.white,
         iconTheme: IconThemeData(
           color: _appbarcolors,
         ),
-        backgroundColor: Theme.of(context).brightness == Brightness.light
-            ? Colors.white
-            : Theme.of(context).primaryColor,
         leading: IconButton(
             icon: Icon(Icons.arrow_back_ios), onPressed: () => _exit()),
         centerTitle: true,
@@ -152,7 +154,7 @@ class _ActivityDetail extends State<ActivityDetail> {
           Icons.add,
           color: _appbarcolors,
         ),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: _gData.getSettings().isDark() ? Theme.of(context).primaryColor : Colors.white,
         splashColor: Colors.white,
       ),
     );

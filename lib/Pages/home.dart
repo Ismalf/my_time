@@ -174,6 +174,10 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
         ListTile(
           leading: Icon(Icons.view_list),
           title: Text('Pending tasks'),
+          onTap: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pushNamed('/settings');
+          },
         ),
         ListTile(
           leading: Icon(Icons.history),
@@ -196,6 +200,10 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
         ListTile(
           leading: Icon(Icons.settings),
           title: Text('Settings'),
+          onTap: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pushNamed('/settings');
+          },
         ),
         ListTile(
           leading: Icon(Icons.star_border),
@@ -207,18 +215,22 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    DailySet _ds = StateContainer.of(context).getTodaySet();
+    var _gData = StateContainer.of(context);
+    DailySet _ds = _gData.getTodaySet();
     var _appbarcolors = Theme.of(context).brightness == Brightness.dark
         ? Colors.white
         : Colors.black;
+    if (!_gData.getSettings().isDark())
+      SystemChrome.setSystemUIOverlayStyle(
+          SystemUiOverlayStyle(statusBarColor: Colors.white));
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
-        brightness: Brightness.dark,
-        iconTheme: IconThemeData(
-          color: _appbarcolors,
-        ),
-        backgroundColor: Theme.of(context).primaryColor,
+        brightness:
+            _gData.getSettings().isDark() ? Brightness.dark : Brightness.light,
+        backgroundColor: _gData.getSettings().isDark()
+            ? Theme.of(context).primaryColor
+            : Colors.white,
         actions: <Widget>[
           PopupMenuButton(
             icon: Icon(_homeView),
@@ -374,7 +386,9 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
           Icons.add,
           color: _appbarcolors,
         ),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: _gData.getSettings().isDark()
+            ? Theme.of(context).primaryColor
+            : Colors.white,
         splashColor: Colors.white,
       ),
     );

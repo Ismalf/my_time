@@ -67,7 +67,9 @@ class _DailyPieChart extends State<DailyPieChart> {
           <CircularSegmentEntry>[
             new CircularSegmentEntry(
               100,
-              Colors.white10,
+              StateContainer.of(context).getSettings().isDark()
+              ? Colors.white10
+              : Colors.black12,
               rankKey: '_fill',
             )
           ],
@@ -88,7 +90,9 @@ class _DailyPieChart extends State<DailyPieChart> {
       entries.add(
         new CircularSegmentEntry(
           100.0,
-          Colors.white10,
+          StateContainer.of(context).getSettings().isDark()
+              ? Colors.white10
+              : Colors.black12,
           rankKey: '_fill',
         ),
       );

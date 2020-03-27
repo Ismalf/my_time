@@ -22,11 +22,13 @@ class _NewActivity extends State<NewActivity> {
 
   @override
   Widget build(BuildContext context) {
+    var _gData = StateContainer.of(context);
     _ds = StateContainer.of(context).getTodaySet();
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
+        title: Text('New task'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios),
           onPressed: () => Commons()
@@ -36,6 +38,12 @@ class _NewActivity extends State<NewActivity> {
             if (value) Navigator.of(context).pop();
           }),
         ),
+        elevation: 0.0,
+        brightness:
+            _gData.getSettings().isDark() ? Brightness.dark : Brightness.light,
+        backgroundColor: _gData.getSettings().isDark()
+            ? Theme.of(context).primaryColor
+            : Colors.white,
       ),
       body: ListView(
         children: <Widget>[

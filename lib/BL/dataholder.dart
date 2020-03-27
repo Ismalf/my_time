@@ -3,16 +3,16 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:my_time/BL/common.dart';
+import 'package:my_time/Data/AppSettings/settings.dart';
 import 'package:my_time/Data/Daos/dailySet_dao.dart';
 import 'package:my_time/Data/Models/activity_model.dart';
 import 'package:my_time/Data/Models/daily_set.dart';
 
 class StateContainer extends StatefulWidget {
   final Widget child;
-  StateContainer({
-    Key key,
-    this.child,
-  }) : super(key: key);
+  final ValueChanged onThemeChange;
+
+  StateContainer({Key key, this.child, this.onThemeChange}) : super(key: key);
 
   static StateContainerState of(BuildContext context) {
     return (context.dependOnInheritedWidgetOfExactType<InheritedContainer>())
@@ -26,6 +26,8 @@ class StateContainer extends StatefulWidget {
 class StateContainerState extends State<StateContainer> {
   DailySetList _sets;
 
+  var _theme = StreamController.broadcast(onListen: () => print('listening'));
+
   Map<int, String> _keys = Map();
 
   Map<int, StreamController> _controllers = Map();
@@ -35,6 +37,14 @@ class StateContainerState extends State<StateContainer> {
   DailySet _todaySet;
   DailySet _yesterdaySet;
   DailySet _tomorrowSet;
+
+  /// App Settings
+
+  AppSettings _settings;
+
+  Stream getThemeStream() {
+    return _theme.stream;
+  }
 
   void setTodaySet(DailySet x) {
     _todaySet = x;
@@ -173,10 +183,20 @@ class StateContainerState extends State<StateContainer> {
     //TODO save to DB once set is updated
   }
 
+  AppSettings getSettings() {
+    return _settings;
+  }
+
+  void setDarkMode(val) {
+    setState(()=>_settings.setDarkMode(val));
+    _theme.add(val ? Brightness.dark : Brightness.light);
+  }
+
   @override
   void initState() {
     super.initState();
     //load sets from db
+    _settings = AppSettings();
   }
 
   @override
