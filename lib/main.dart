@@ -37,7 +37,7 @@ class _$MyApp extends State<_MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    var _appBrightness = StateContainer.of(context).getSettings().isDark()
+    var _appBrightness = StateContainer.of(context).getSettings().isDark
         ? Brightness.dark
         : Brightness.light;
     // TODO: implement build

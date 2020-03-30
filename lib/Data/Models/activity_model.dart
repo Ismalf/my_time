@@ -3,7 +3,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:my_time/BL/helpers/custom_ColorSerialization.dart';
 import 'package:my_time/BL/helpers/custom_timeOfDay.dart';
 
-
 part 'activity_model.g.dart';
 
 @JsonSerializable()
@@ -21,6 +20,8 @@ class Task {
   String priority;
 
   String category;
+
+  bool isComplete;
 
   String name;
 
@@ -49,7 +50,8 @@ class Task {
       this.startDate,
       this.startDateTime,
       this.taskColor = Colors.lightBlue,
-      this.timeForTask});
+      this.timeForTask,
+      this.isComplete = false});
 
   factory Task.fromJson(Map<String, dynamic> json) => _$TaskFromJson(json);
 

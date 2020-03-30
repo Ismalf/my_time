@@ -5,7 +5,6 @@ import 'package:flutter_material_color_picker/flutter_material_color_picker.dart
 import 'package:icon_shadow/icon_shadow.dart';
 import 'package:my_time/BL/common.dart';
 import 'package:my_time/BL/dataholder.dart';
-import 'package:my_time/Data/Daos/dailySet_dao.dart';
 import 'package:my_time/Data/Models/daily_set.dart';
 import 'package:my_time/Pages/Widgets/daily_pie_chart.dart';
 import 'package:my_time/custom_icons/custom_icons_icons.dart';
@@ -73,8 +72,6 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
   }
 
   Widget _activitiesList(x, _appbarcolors) {
-    print(x.tasks);
-
     return GestureDetector(
       child: x.tasks.length == 0
           ? Center(
@@ -127,14 +124,11 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
     //get from DB
     //load on memory so it's not neccesary to read from db each time
     //widget is built
-
-    DailySetList sets = await StateContainer.of(context).loadData(context);
-    DailySet _todaySet = sets.dailysets
-        .firstWhere((ds) => Commons().compareDates(ds.day, _today));
-    DailySet _yesterdaySet = sets.dailysets
-        .firstWhere((ds) => Commons().compareDates(ds.day, _yesterday));
-    DailySet _tomorrowSet = sets.dailysets
-        .firstWhere((ds) => Commons().compareDates(ds.day, _tomorrow));
+    var _gData = StateContainer.of(context);
+    DailySetList sets = await _gData.loadData(context);
+    DailySet _todaySet = _gData.getTodaySet();
+    DailySet _yesterdaySet = _gData.getYesterdaySet();
+    DailySet _tomorrowSet = _gData.getTomorrowSet();
 
     //if yesteday doesnt had any activity dont show it
     if (_yesterdaySet.tasks.length != 0) {
@@ -220,15 +214,13 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
     var _appbarcolors = Theme.of(context).brightness == Brightness.dark
         ? Colors.white
         : Colors.black;
-    if (!_gData.getSettings().isDark())
-      SystemChrome.setSystemUIOverlayStyle(
-          SystemUiOverlayStyle(statusBarColor: Colors.white));
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
         brightness:
-            _gData.getSettings().isDark() ? Brightness.dark : Brightness.light,
-        backgroundColor: _gData.getSettings().isDark()
+            _gData.getSettings().isDark ? Brightness.dark : Brightness.light,
+        backgroundColor: _gData.getSettings().isDark
             ? Theme.of(context).primaryColor
             : Colors.white,
         actions: <Widget>[
@@ -386,7 +378,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
           Icons.add,
           color: _appbarcolors,
         ),
-        backgroundColor: _gData.getSettings().isDark()
+        backgroundColor: _gData.getSettings().isDark
             ? Theme.of(context).primaryColor
             : Colors.white,
         splashColor: Colors.white,
@@ -394,62 +386,23 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
     );
   }
 
-  _isPastSchedule() {
-    return currentIndex == 0 &&
-        !Commons().compareDates(
-            StateContainer.of(context).getTodaySet().day, DateTime.now());
-  }
-
-  void resetDays() {
-    var _gData = StateContainer.of(context);
-    DailySet _todaySet = _gData.loadSet(_today);
-    DailySet _yesterdaySet = _gData.loadSet(_yesterday);
-    DailySet _tomorrowSet = _gData.loadSet(_tomorrow);
-
-    //if yesteday doesnt had any activity dont show it
-    if (_yesterdaySet.tasks.length != 0) {
-      _pageController = PageController(initialPage: 1);
-      currentIndex = 1;
-      _days.add(
-        DailyPieChart(
-          taskController: _gData.dsStreamController(_yesterdaySet).stream,
-        ),
-      );
-    }
-
-    _days.add(
-      DailyPieChart(
-        taskController: _gData.dsStreamController(_todaySet).stream,
-      ),
-    );
-    _days.add(
-      DailyPieChart(
-        taskController: _gData.dsStreamController(_tomorrowSet).stream,
-      ),
-    );
-    setState(() {});
-  }
-
   _newActivity() async {
-    ///TODO implement new activity page: home page
-
-    dynamic x = await Navigator.of(context).pushNamed('/new_activity');
+    await Navigator.of(context).pushNamed('/new_activity');
   }
 
-  _calculatedayslist(int i) {
-    print(i);
+  _calculatedayslist(int i) async {
     var _gData = StateContainer.of(context);
+    _gData.setTodaySet(
+        i < currentIndex ? _gData.getYesterdaySet() : _gData.getTomorrowSet());
+    _today = i < currentIndex ? _yesterday : _tomorrow;
+    currentIndex = i == 0 ? 1 : i;
+    _yesterday = _today.add(Duration(days: -1));
+    _tomorrow = _today.add(Duration(days: 1));
+    var _ys = await _gData.loadSet(_yesterday, context);
+    var _ts = await _gData.loadSet(_tomorrow, context);
+    _gData.setYesterdaySet(_ys);
+    _gData.setTomorrowSet(_ts);
     setState(() {
-      _gData.setTodaySet(i < currentIndex
-          ? _gData.getYesterdaySet()
-          : _gData.getTomorrowSet());
-      _today = i < currentIndex ? _yesterday : _tomorrow;
-      currentIndex = i == 0 ? 1 : i;
-      _yesterday = _today.add(Duration(days: -1));
-      _tomorrow = _today.add(Duration(days: 1));
-      _gData.setYesterdaySet(_gData.loadSet(_yesterday));
-      _gData.setTomorrowSet(_gData.loadSet(_tomorrow));
-      var tom = _tomorrow;
       if (i == _days.length - 1) {
         Widget w = DailyPieChart(
           taskController:

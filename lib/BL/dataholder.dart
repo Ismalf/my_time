@@ -100,26 +100,34 @@ class StateContainerState extends State<StateContainer> {
     return _keys.keys.firstWhere((m) => _keys[m] == ds.formatDate());
   }
 
+  getKeys() {
+    return this._keys;
+  }
+
+  getSets(){
+    return this._sets;
+  }
+
   /// Read data from DB
   Future<DailySetList> loadData(context) async {
     // execute db read
     _sets = await DailySetDao().getAllData(context);
     //load keys into memory
 
-    _setValues(_sets);
+    await _setValues(_sets, context);
     return _sets;
   }
 
-  _setValues(DailySetList _sets) {
+  _setValues(DailySetList _sets, context) async {
     var _today = DateTime.now();
     var _yesterday = _today.add(Duration(days: -1));
     var _tomorrow = _today.add(Duration(days: 1));
 
-    setTodaySet(loadSet(_today));
+    setTodaySet(await loadSet(_today, context));
 
-    setYesterdaySet(loadSet(_yesterday));
+    setYesterdaySet(await loadSet(_yesterday, context));
 
-    setTomorrowSet(loadSet(_tomorrow));
+    setTomorrowSet(await loadSet(_tomorrow, context));
   }
 
   /// As the activity list reorders, so must do the activity list
@@ -130,7 +138,7 @@ class StateContainerState extends State<StateContainer> {
   }
 
   /// Get a date-specific set of tasks
-  DailySet loadSet(DateTime day) {
+  loadSet(DateTime day, context) async {
     DailySet _set;
     try {
       // search the sets for a set matching the correspondig date
@@ -141,11 +149,10 @@ class StateContainerState extends State<StateContainer> {
       // as the firstWhere method throws an error if no match is found
       // catch it and make a new set with the corresponding date
       _set = DailySet(day: day, tasks: []);
-      DailySetDao().insert(_set, context).then((val) {
-        //when new date is finished inserting, set its new controller
-        print(val);
-        _setController(_set);
-      });
+      await DailySetDao().insert(_set, context);
+      //when new date is finished inserting, set its new controller
+
+      _setController(_set);
 
       _sets.dailysets.add(_set);
     }
@@ -176,8 +183,8 @@ class StateContainerState extends State<StateContainer> {
     }
   }
 
-  void updateSet(DateTime day, List<Task> tasks) {
-    var _set = loadSet(day); // get the corresponding set
+  void updateSet(DateTime day, List<Task> tasks, context) {
+    var _set = loadSet(day, context); // get the corresponding set
     _set.tasks = tasks; // update tasks
 
     //TODO save to DB once set is updated
@@ -188,7 +195,7 @@ class StateContainerState extends State<StateContainer> {
   }
 
   void setDarkMode(val) {
-    setState(()=>_settings.setDarkMode(val));
+    setState(() => _settings.setDarkMode(val));
     _theme.add(val ? Brightness.dark : Brightness.light);
   }
 

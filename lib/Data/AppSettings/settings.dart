@@ -1,13 +1,20 @@
-
-
 class AppSettings {
-  bool _isDark = true;
+  bool isDark;
+  bool showPendingTasks;
+  int daysToShow;
+
+  AppSettings(
+      {this.isDark = true, this.showPendingTasks = true, this.daysToShow = 1});
 
   setDarkMode(val) {
-    _isDark = val;
+    isDark = val;
   }
 
-  isDark() {
-    return _isDark;
+  setPendingTasks(val){
+    showPendingTasks = val;
+  }
+
+  setDaysToShow(val){
+    daysToShow = val;
   }
 }

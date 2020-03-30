@@ -67,7 +67,7 @@ class _DailyPieChart extends State<DailyPieChart> {
           <CircularSegmentEntry>[
             new CircularSegmentEntry(
               100,
-              StateContainer.of(context).getSettings().isDark()
+              StateContainer.of(context).getSettings().isDark
               ? Colors.white10
               : Colors.black12,
               rankKey: '_fill',
@@ -90,7 +90,7 @@ class _DailyPieChart extends State<DailyPieChart> {
       entries.add(
         new CircularSegmentEntry(
           100.0,
-          StateContainer.of(context).getSettings().isDark()
+          StateContainer.of(context).getSettings().isDark
               ? Colors.white10
               : Colors.black12,
           rankKey: '_fill',
@@ -143,9 +143,6 @@ class _DailyPieChart extends State<DailyPieChart> {
           case ConnectionState.active:
             value = snapshot.data;
             _chartKey = new GlobalKey<AnimatedCircularChartState>();
-
-            print('active');
-            print(value);
             return new AnimatedCircularChart(
               key: _chartKey,
               size: _chartSize,

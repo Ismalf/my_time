@@ -30,6 +30,7 @@ Task _$TaskFromJson(Map<String, dynamic> json) {
     taskColor: const CustomColorEncode().fromJson(json['taskColor'] as String),
     timeForTask:
         const CustomTODConverter().fromJson(json['timeForTask'] as String),
+    isComplete: json['isComplete'] as bool,
   );
 }
 
@@ -40,6 +41,7 @@ Map<String, dynamic> _$TaskToJson(Task instance) => <String, dynamic>{
       'hasAlarm': instance.hasAlarm,
       'priority': instance.priority,
       'category': instance.category,
+      'isComplete': instance.isComplete,
       'name': instance.name,
       'dueDate': instance.dueDate?.toIso8601String(),
       'startDate': instance.startDate?.toIso8601String(),

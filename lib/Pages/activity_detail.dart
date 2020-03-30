@@ -68,8 +68,8 @@ class _ActivityDetail extends State<ActivityDetail> {
       appBar: AppBar(
         elevation: 0.0,
         brightness:
-            _gData.getSettings().isDark() ? Brightness.dark : Brightness.light,
-        backgroundColor: _gData.getSettings().isDark()
+            _gData.getSettings().isDark ? Brightness.dark : Brightness.light,
+        backgroundColor: _gData.getSettings().isDark
             ? Theme.of(context).primaryColor
             : Colors.white,
         iconTheme: IconThemeData(
@@ -154,7 +154,7 @@ class _ActivityDetail extends State<ActivityDetail> {
           Icons.add,
           color: _appbarcolors,
         ),
-        backgroundColor: _gData.getSettings().isDark() ? Theme.of(context).primaryColor : Colors.white,
+        backgroundColor: _gData.getSettings().isDark ? Theme.of(context).primaryColor : Colors.white,
         splashColor: Colors.white,
       ),
     );

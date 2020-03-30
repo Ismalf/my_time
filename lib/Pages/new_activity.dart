@@ -40,8 +40,8 @@ class _NewActivity extends State<NewActivity> {
         ),
         elevation: 0.0,
         brightness:
-            _gData.getSettings().isDark() ? Brightness.dark : Brightness.light,
-        backgroundColor: _gData.getSettings().isDark()
+            _gData.getSettings().isDark ? Brightness.dark : Brightness.light,
+        backgroundColor: _gData.getSettings().isDark
             ? Theme.of(context).primaryColor
             : Colors.white,
       ),
