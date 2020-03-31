@@ -83,10 +83,10 @@ class StateContainerState extends State<StateContainer> {
     return this._sets == null;
   }
 
-  void addTask(task, date) {
-    print(getTodaySet().day.toString());
-    var ds =
-        _sets.dailysets.firstWhere((s) => Commons().compareDates(s.day, date));
+  addTask(Task task) async{
+    
+    var ds = await loadSet(task.dueDate, context);
+        //_sets.dailysets.firstWhere((s) => Commons().compareDates(s.day, task.dueDate));
     setState(() {
       ds.tasks.add(task);
       //send new DailySet into the stream to update
@@ -94,6 +94,7 @@ class StateContainerState extends State<StateContainer> {
       dsStreamController(ds).add(ds);
     });
     DailySetDao().updateTask(ds, _getKey(ds));
+    return true;
   }
 
   _getKey(ds) {

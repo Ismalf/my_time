@@ -87,14 +87,26 @@ class _SettingsPage extends State<SettingsPage> {
             title: Text('Reassing not finished tasks to the next day'),
             subtitle: Text(
                 'Tasks not marked as finished on due date will be assigned to the next day'),
-            trailing:
-                Switch(value: _gData.getSettings().isDark, onChanged: null),
+            trailing: Switch(
+                value: _gData.getSettings().reassingTasks,
+                onChanged: (_v) =>
+                    setState(() => _gData.getSettings().reassingTasks)),
           ),
           ListTile(
             title: Text('Show assigned time on task summary'),
             trailing: Switch(
-              value: _gData.getSettings().isDark,
-              onChanged: null,
+              value: _gData.getSettings().showAssignedTime,
+              onChanged: (_v) =>
+                  setState(() => _gData.getSettings().showAssignedTime = _v),
+            ),
+          ),
+          ListTile(
+            title: Text('Split daily routine from tasks'),
+            subtitle: Text('Inner circle of the pie will show tasks, trying to fit them among daily routine activities'),
+            trailing: Switch(
+              value: _gData.getSettings().splitDailyRoutine,
+              onChanged: (_v) =>
+                  setState(() => _gData.getSettings().splitDailyRoutine = _v),
             ),
           ),
           Divider(),

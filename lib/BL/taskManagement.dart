@@ -7,6 +7,8 @@ import 'package:my_time/Data/Models/daily_set.dart';
 class TaskManagement {
   /// Sort tasks of all the current dailysets available
   /// so all tasks are related to their due date set
+  /// 
+  /// Called when creating a new task
   static sortTasksToDueDate(DailySetList _sets) {
     List<Task> _dueTomorrow = [];
     _sets.dailysets.forEach((_ds) {

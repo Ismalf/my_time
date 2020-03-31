@@ -69,8 +69,8 @@ class _NewActivity extends State<NewActivity> {
     );
   }
 
-  _save() {
-    StateContainer.of(context).addTask(_task, _ds.day);
+  _save() async {
+    await StateContainer.of(context).addTask(_task);
     Navigator.of(context).pop(_ds);
   }
 

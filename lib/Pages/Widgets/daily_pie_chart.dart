@@ -60,6 +60,7 @@ class _DailyPieChart extends State<DailyPieChart> {
 
   List<CircularStackEntry> _generateChartData(DailySet value) {
     List<Task> tasks = value.tasks ?? [];
+
     List<CircularStackEntry> data = <CircularStackEntry>[];
     if (tasks?.length == 0)
       data.add(
@@ -68,8 +69,8 @@ class _DailyPieChart extends State<DailyPieChart> {
             new CircularSegmentEntry(
               100,
               StateContainer.of(context).getSettings().isDark
-              ? Colors.white10
-              : Colors.black12,
+                  ? Colors.white10
+                  : Colors.black12,
               rankKey: '_fill',
             )
           ],
@@ -77,9 +78,10 @@ class _DailyPieChart extends State<DailyPieChart> {
         ),
       );
     else {
-      var entries = <CircularSegmentEntry>[];
+      var _entries = <CircularSegmentEntry>[];
+
       tasks.forEach(
-        (task) => entries.add(
+        (task) => _entries.add(
           new CircularSegmentEntry(
             _calculatePercentage(task.timeForTask),
             task.taskColor,
@@ -87,7 +89,7 @@ class _DailyPieChart extends State<DailyPieChart> {
           ),
         ),
       );
-      entries.add(
+      _entries.add(
         new CircularSegmentEntry(
           100.0,
           StateContainer.of(context).getSettings().isDark
@@ -96,9 +98,10 @@ class _DailyPieChart extends State<DailyPieChart> {
           rankKey: '_fill',
         ),
       );
+
       data.add(
         new CircularStackEntry(
-          entries,
+          _entries,
           rankKey: 'percentage',
         ),
       );
@@ -126,9 +129,6 @@ class _DailyPieChart extends State<DailyPieChart> {
           case ConnectionState.waiting:
             value = snapshot.data;
             _chartKey = new GlobalKey<AnimatedCircularChartState>();
-
-            print('waiting');
-            print(value);
             return new AnimatedCircularChart(
               key: _chartKey,
               size: _chartSize,

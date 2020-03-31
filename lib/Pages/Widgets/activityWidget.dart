@@ -129,7 +129,7 @@ class _ActivityWidget extends State<ActivityWidget> {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    'Task name',
+                    'Activity name',
                     style: _subtitleTextStyle,
                   ),
                 ),
@@ -140,7 +140,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                     onChanged: (o) => setState(() => _task.name = o),
                     cursorColor: _hasColor(),
                     decoration: InputDecoration(
-                      hintText: 'Task Name',
+                      hintText: 'Name',
                       focusColor: _hasColor(),
                       fillColor: _hasColor(),
                       border: UnderlineInputBorder(
@@ -157,7 +157,7 @@ class _ActivityWidget extends State<ActivityWidget> {
         ),
 
         ///DUE DATE
-        _task.hasPlan
+        /* _task.hasPlan
             ? Container()
             : AnimatedOpacity(
                 opacity: _cardsOpacity,
@@ -230,51 +230,179 @@ class _ActivityWidget extends State<ActivityWidget> {
                     ),
                   ),
                 ),
-              ),
+              ), */
 
         ///TIME FOR THE TASK
-        GestureDetector(
+        Card(
+          child: Padding(
+            padding: EdgeInsets.all(15.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Text('Daily Schedule', style: _subtitleTextStyle),
+                    Icon(Icons.schedule),
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 15.0),
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                'Start at',
+                                style: _subtitleTextStyle,
+                              ),
+                              _task.startDateTime != null
+                                  ? Text(
+                                      MaterialLocalizations.of(context)
+                                          .formatTimeOfDay(_task.startDateTime),
+                                      style: _dateTextStyle,
+                                    )
+                                  : Container(),
+                            ],
+                          ),
+                          Theme(
+                            data: Theme.of(context).copyWith(
+                              primaryColor: Colors.white,
+                              accentColor: _hasColor(),
+                              accentTextTheme: TextTheme(
+                                body1: TextStyle(
+                                  color: _hasColor().computeLuminance() > 0.5
+                                      ? Colors.black
+                                      : Colors.white,
+                                ),
+                                button: TextStyle(
+                                  color: _hasColor(),
+                                ),
+                              ),
+                              textTheme: Theme.of(context).textTheme.copyWith(
+                                    button: TextStyle(
+                                      color: _hasColor(),
+                                    ),
+                                  ),
+                              buttonTheme: ButtonThemeData(
+                                  textTheme: ButtonTextTheme.accent),
+                            ),
+                            child: Builder(
+                              builder: (context) => IconButton(
+                                icon: Icon(Icons.calendar_today),
+                                onPressed: () => _selectStartDate(context),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                'End at',
+                                style: _subtitleTextStyle,
+                              ),
+                              _task.dueDateTime != null
+                                  ? Text(
+                                      MaterialLocalizations.of(context)
+                                          .formatTimeOfDay(_task.dueDateTime),
+                                      style: _dateTextStyle,
+                                    )
+                                  : Container(),
+                            ],
+                          ),
+                          Theme(
+                            data: Theme.of(context).copyWith(
+                              primaryColor: Colors.white,
+                              accentColor: _hasColor(),
+                              accentTextTheme: TextTheme(
+                                body1: TextStyle(
+                                  color: _hasColor().computeLuminance() > 0.5
+                                      ? Colors.black
+                                      : Colors.white,
+                                ),
+                                button: TextStyle(
+                                  color: _hasColor(),
+                                ),
+                              ),
+                              textTheme: Theme.of(context).textTheme.copyWith(
+                                    button: TextStyle(
+                                      color: _hasColor(),
+                                    ),
+                                  ),
+                              buttonTheme: ButtonThemeData(
+                                  textTheme: ButtonTextTheme.accent),
+                            ),
+                            child: Builder(
+                              builder: (context) => IconButton(
+                                icon: Icon(Icons.calendar_today),
+                                onPressed: () => _selectDueDate(context),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Flexible(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Flexible(
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Expanded(
+                                        child: Text('Time assigned'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                /* Text(
+                                  'Tap to set',
+                                  style: _dateTextStyle,
+                                ), */
+                              ],
+                            ),
+                          ),
+                          TimeIndicator(
+                            hour: _task.timeForTask?.hour ?? 0,
+                            minute: _task.timeForTask?.minute ?? 0,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        /* GestureDetector(
           child: Card(
             child: Padding(
               padding: EdgeInsets.all(15.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Flexible(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Flexible(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Expanded(
-                                child: Text('Time assigned for the task'),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          'Tap to set',
-                          style: _dateTextStyle,
-                        ),
-                      ],
-                    ),
-                  ),
-                  TimeIndicator(
-                    hour: _task.timeForTask?.hour ?? 0,
-                    minute: _task.timeForTask?.minute ?? 0,
-                  ),
-                ],
-              ),
+              child: 
             ),
           ),
           onTap: () => _showTaskTimeModal(context),
-        ),
+        ), */
 
         ///COLOR PICKER
         Card(
@@ -441,25 +569,13 @@ class _ActivityWidget extends State<ActivityWidget> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: <Widget>[
                                         _task.reminder != null
-                                            ? _task.hasPlan
-                                                ? Text(
-                                                    'Daily at: ' +
-                                                        TimeOfDay.fromDateTime(
-                                                                _task.reminder)
-                                                            .format(context),
-                                                    style: _subtitleTextStyle,
-                                                  )
-                                                : Text(
-                                                    DateFormat(
-                                                          'EEE d, MMMM yyyy',
-                                                        ).format(
-                                                            _task.reminder) +
-                                                        ' ' +
-                                                        TimeOfDay.fromDateTime(
-                                                                _task.reminder)
-                                                            .format(context),
-                                                    style: _subtitleTextStyle,
-                                                  )
+                                            ? Text(
+                                                'Daily at: ' +
+                                                    TimeOfDay.fromDateTime(
+                                                            _task.reminder)
+                                                        .format(context),
+                                                style: _subtitleTextStyle,
+                                              )
                                             : Text(
                                                 'No reminder set',
                                                 style: _subtitleTextStyle,
@@ -506,215 +622,10 @@ class _ActivityWidget extends State<ActivityWidget> {
         ),
 
         ///PLAN AHEAD
-        Card(
-          child: Padding(
-            padding: EdgeInsets.only(right: 15.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Switch(
-                      value: _task.hasPlan,
-                      onChanged: (active) => setState(() {
-                        active
-                            ? _showPlanAheadSettings()
-                            : _hidePlanAheadSettings();
-                      }),
-                      activeColor: _hasColor(),
-                    ),
-                    Text('Daily Schedule'),
-                    Icon(Icons.schedule),
-                  ],
-                ),
-                _task.hasPlan
-                    ? Padding(
-                        padding: EdgeInsets.all(15.0),
-                        child: Column(
-                          children: <Widget>[
-                            AnimatedOpacity(
-                              duration: Duration(
-                                  milliseconds: !_task.hasPlan ? 500 : 150),
-                              opacity: _startDatePhOpacity,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                        'Start date',
-                                        style: _subtitleTextStyle,
-                                      ),
-                                      _task.startDate != null
-                                          ? Text(
-                                              DateFormat('EEE d, MMMM yyyy')
-                                                  .format(_task.startDate),
-                                              style: _dateTextStyle,
-                                            )
-                                          : Container(),
-                                      _task.startDateTime != null
-                                          ? Text(
-                                              MaterialLocalizations.of(context)
-                                                  .formatTimeOfDay(
-                                                      _task.startDateTime),
-                                              style: _dateTextStyle,
-                                            )
-                                          : Container(),
-                                    ],
-                                  ),
-                                  Theme(
-                                    data: Theme.of(context).copyWith(
-                                      primaryColor: Colors.white,
-                                      accentColor: _hasColor(),
-                                      accentTextTheme: TextTheme(
-                                        body1: TextStyle(
-                                          color:
-                                              _hasColor().computeLuminance() >
-                                                      0.5
-                                                  ? Colors.black
-                                                  : Colors.white,
-                                        ),
-                                        button: TextStyle(
-                                          color: _hasColor(),
-                                        ),
-                                      ),
-                                      textTheme:
-                                          Theme.of(context).textTheme.copyWith(
-                                                button: TextStyle(
-                                                  color: _hasColor(),
-                                                ),
-                                              ),
-                                      buttonTheme: ButtonThemeData(
-                                          textTheme: ButtonTextTheme.accent),
-                                    ),
-                                    child: Builder(
-                                      builder: (context) => IconButton(
-                                        icon: Icon(Icons.calendar_today),
-                                        onPressed: () =>
-                                            _selectStartDate(context),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            AnimatedOpacity(
-                              duration: Duration(
-                                  milliseconds: !_task.hasPlan ? 500 : 100),
-                              opacity: _dueDatePhOpacity,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                        'Due date',
-                                        style: _subtitleTextStyle,
-                                      ),
-                                      _task.dueDate == null
-                                          ? Text(
-                                              'Leave empty for daily tasks',
-                                              style: _dateTextStyle,
-                                            )
-                                          : Container(),
-                                      _task.dueDate != null
-                                          ? Text(
-                                              DateFormat('EEE d, MMMM yyyy')
-                                                  .format(_task.dueDate),
-                                              style: _dateTextStyle,
-                                            )
-                                          : Container(),
-                                      _task.dueDateTime != null
-                                          ? Text(
-                                              MaterialLocalizations.of(context)
-                                                  .formatTimeOfDay(
-                                                      _task.dueDateTime),
-                                              style: _dateTextStyle,
-                                            )
-                                          : Container(),
-                                    ],
-                                  ),
-                                  Theme(
-                                    data: Theme.of(context).copyWith(
-                                      primaryColor: Colors.white,
-                                      accentColor: _hasColor(),
-                                      accentTextTheme: TextTheme(
-                                        body1: TextStyle(
-                                          color:
-                                              _hasColor().computeLuminance() >
-                                                      0.5
-                                                  ? Colors.black
-                                                  : Colors.white,
-                                        ),
-                                        button: TextStyle(
-                                          color: _hasColor(),
-                                        ),
-                                      ),
-                                      textTheme:
-                                          Theme.of(context).textTheme.copyWith(
-                                                button: TextStyle(
-                                                  color: _hasColor(),
-                                                ),
-                                              ),
-                                      buttonTheme: ButtonThemeData(
-                                          textTheme: ButtonTextTheme.accent),
-                                    ),
-                                    child: Builder(
-                                      builder: (context) => IconButton(
-                                        icon: Icon(Icons.calendar_today),
-                                        onPressed: () =>
-                                            _selectDueDate(context),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            AnimatedOpacity(
-                              opacity: _timeAvailablePhOpacity,
-                              duration: Duration(
-                                  milliseconds: !_task.hasPlan ? 500 : 50),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  Expanded(
-                                    child: Text(
-                                      'Use daily reminder',
-                                      style: _subtitleTextStyle,
-                                    ),
-                                  ),
-                                  Checkbox(
-                                    value: _task.hasDailyReminder,
-                                    activeColor: _hasColor(),
-                                    onChanged: (active) => setState(() {
-                                      _task.hasDailyReminder = active;
-                                      if (_task.hasDailyReminder)
-                                        _forceReminder();
-                                    }),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : Container(),
-              ],
-            ),
-          ),
-        ),
+
+        SizedBox(
+          height: 40.0,
+        )
       ],
     );
   }
@@ -751,7 +662,7 @@ class _ActivityWidget extends State<ActivityWidget> {
   }
 
   void _selectDueDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
+    /* final DateTime picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now().subtract(
@@ -766,7 +677,21 @@ class _ActivityWidget extends State<ActivityWidget> {
         ),
         child: child,
       ),
-    );
+    ); */
+    if (_task.startDateTime == null) {
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please set a starting hour'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () {
+              // Some code to undo the change.
+            },
+          ),
+        ),
+      );
+      return;
+    }
     final TimeOfDay _time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
@@ -779,16 +704,55 @@ class _ActivityWidget extends State<ActivityWidget> {
         child: child,
       ),
     );
-    if (picked != null && picked != _task.dueDate) {
-      setState(() {
-        _task.dueDate = picked;
-        _task.dueDateTime = _time;
-      });
+
+    setState(() {
+      _task.dueDate = DateTime.now();
+      _task.dueDateTime = _time;
+      _task.timeForTask = _substractTOD(_task.dueDateTime, _task.startDateTime);
+    });
+  }
+
+  _substractTOD(TimeOfDay end, TimeOfDay start) {
+    if (end.period == start.period) {
+      var _total =
+          (end.hour * 60 + end.minute) - (start.hour * 60 + start.minute);
+      var _hour = 0;
+      var _minute = 0;
+      if (_total >= 60) {
+        _hour = (_total / 60).floor();
+        _minute = _total - 60 * _hour;
+      }
+      return TimeOfDay(hour: _hour, minute: _minute);
+    } else if (end.period.index < start.period.index) {
+      var _total =
+          ((start.hourOfPeriod - start.periodOffset) * 60 + start.minute) -
+              (end.hour * 60 + end.minute);
+      _total = _total.abs();
+
+      var _hour = 0;
+      var _minute = 0;
+      if (_total >= 60) {
+        _hour = (_total / 60).floor();
+        _minute = _total - 60 * _hour;
+      }
+      return TimeOfDay(hour: _hour, minute: _minute);
+    } else {
+      var _total = ((end.hour + start.periodOffset) * 60 + end.minute) -
+          (start.hour * 60 + start.minute);
+      _total = _total.abs();
+
+      var _hour = 0;
+      var _minute = 0;
+      if (_total >= 60) {
+        _hour = (_total / 60).floor();
+        _minute = _total - 60 * _hour;
+      }
+      return TimeOfDay(hour: _hour, minute: _minute);
     }
   }
 
   void _selectStartDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
+    /* final DateTime picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now().subtract(
@@ -803,7 +767,7 @@ class _ActivityWidget extends State<ActivityWidget> {
         ),
         child: child,
       ),
-    );
+    ); */
     final TimeOfDay _time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
@@ -816,12 +780,12 @@ class _ActivityWidget extends State<ActivityWidget> {
         child: child,
       ),
     );
-    if (picked != null && picked != _task.dueDate) {
-      setState(() {
-        _task.startDate = picked;
-        _task.startDateTime = _time;
-      });
-    }
+
+    setState(() {
+      _task.startDate = DateTime.now();
+      _task.startDateTime = _time;
+      _task.dueDateTime = _task.timeForTask = null;
+    });
   }
 
   void selectColor(BuildContext context) async {
@@ -876,7 +840,7 @@ class _ActivityWidget extends State<ActivityWidget> {
     if (dueDate == null && startDate == null) {
       Scaffold.of(context).showSnackBar(
         SnackBar(
-          content: Text('Please set a Due Date or Start Date'),
+          content: Text('Please set a starting hour'),
           action: SnackBarAction(
             label: 'Undo',
             onPressed: () {
@@ -949,9 +913,11 @@ class _ActivityWidget extends State<ActivityWidget> {
           var time = picker.adapter.getSelectedValues();
           _task.timeForTask =
               TimeOfDay(hour: int.parse(time[0]), minute: int.parse(time[1]));
-          print(_task.timeForTask.hour.toString() +
-              ':' +
-              _task.timeForTask.minute.toString());
+          if (_task.startDateTime != null)
+            _task.dueDateTime = TimeOfDay(
+                hour: _task.timeForTask.hour + _task.startDateTime.hour,
+                minute: _task.timeForTask.minute + _task.startDateTime.minute);
+
           setState(() {});
         }).showModal(context); //_scaffoldKey.currentState);
   }
