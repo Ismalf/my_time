@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:icon_shadow/icon_shadow.dart';
-import 'package:my_time/BL/common.dart';
 import 'package:my_time/BL/dataholder.dart';
 import 'package:my_time/Data/Models/daily_set.dart';
 import 'package:my_time/Pages/Widgets/daily_pie_chart.dart';
@@ -71,7 +70,7 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
     );
   }
 
-  Widget _activitiesList(x, _appbarcolors) {
+  Widget _activitiesList(DailySet x, _appbarcolors) {
     return GestureDetector(
       child: x.tasks.length == 0
           ? Center(
@@ -96,10 +95,19 @@ class _MyTimeHomePageState extends State<MyTimeHomePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        Text('$hour:$minute'),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                          Text('${x.tasks[index].startDateTime.format(context)}'),
+                          Text('${x.tasks[index].dueDateTime?.format(context)}'),
+                        ],),
+                        SizedBox(
+                          width: 15.0,
+                        ),
+                        /* Text('$hour:$minute'),
                         SizedBox(
                           width: 25.0,
-                        ),
+                        ), */
                         CircleColor(
                           circleSize: 20.0,
                           color: x.tasks[index].taskColor,

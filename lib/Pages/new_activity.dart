@@ -14,6 +14,7 @@ class _NewActivity extends State<NewActivity> {
   DailySet _ds;
   var _task;
   var _changed = false;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   void initState() {
     // TODO: implement initState
@@ -24,8 +25,11 @@ class _NewActivity extends State<NewActivity> {
   Widget build(BuildContext context) {
     var _gData = StateContainer.of(context);
     _ds = StateContainer.of(context).getTodaySet();
+    var _tod = _gData.lastTaskEndTime;
+
     // TODO: implement build
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         automaticallyImplyLeading: true,
         title: Text('New task'),
@@ -48,7 +52,7 @@ class _NewActivity extends State<NewActivity> {
       body: ListView(
         children: <Widget>[
           ActivityWidget(
-            Task(),
+            _tod != null ? Task(startDateTime: _tod) : Task(),
             onChanged: (task) => _updateTask(task),
             expanded: true,
           ),
@@ -71,11 +75,38 @@ class _NewActivity extends State<NewActivity> {
 
   _save() async {
     await StateContainer.of(context).addTask(_task);
+
     Navigator.of(context).pop(_ds);
   }
 
   void _updateTask(Task task) {
-    print(task.name);
+    /*var _gData = StateContainer.of(context);
+    if (_gData.doesOverlap(task.name)) {
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          content: Text('Activity Name is already in use'),
+        ),
+      );
+      return;
+    }
+    if (_gData.doesOverlap(task.taskColor)) {
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          content: Text('Activity Color is already in use'),
+        ),
+      );
+      return;
+    }
+    if (_gData.doesOverlap(task.startDateTime)) {
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          content: Text(
+              'Other activity starts at ${task.startDateTime.format(context)}'),
+        ),
+      );
+
+      return;
+    }*/
     _changed = true;
     _task = task;
   }

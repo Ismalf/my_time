@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:my_time/BL/alarms.dart';
 import 'package:my_time/BL/dataholder.dart';
-import 'package:my_time/Data/Daos/dailySet_dao.dart';
 import 'package:my_time/Data/Models/activity_model.dart';
 import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 
@@ -49,7 +49,7 @@ class _ActivityDetail extends State<ActivityDetail> {
 
   /// current index of task, and new task
   _updateTask(int index, Task task) {
-    StateContainer.of(context).getTodaySet().tasks[index] = task;
+    StateContainer.of(context).addTask(task);
   }
 
   @override
@@ -147,16 +147,18 @@ class _ActivityDetail extends State<ActivityDetail> {
         onReorder: this._reorderCallback,
         onReorderDone: this._reorderDone,
       ),
-      floatingActionButton: FloatingActionButton(
+      /*floatingActionButton: FloatingActionButton(
         onPressed: _newActivity,
         tooltip: 'Increment',
         child: Icon(
           Icons.add,
           color: _appbarcolors,
         ),
-        backgroundColor: _gData.getSettings().isDark ? Theme.of(context).primaryColor : Colors.white,
+        backgroundColor: _gData.getSettings().isDark
+            ? Theme.of(context).primaryColor
+            : Colors.white,
         splashColor: Colors.white,
-      ),
+      ),*/
     );
   }
 

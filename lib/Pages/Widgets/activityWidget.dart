@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
-import 'package:intl/intl.dart';
+import 'package:my_time/BL/dataholder.dart';
 import 'package:my_time/Data/Models/activity_model.dart';
 import 'package:my_time/Pages/Widgets/timeIndicator.dart';
 import 'package:flutter_picker/flutter_picker.dart';
@@ -58,9 +58,11 @@ class _ActivityWidget extends State<ActivityWidget> {
     _expanded = widget.expanded ?? false;
     //Build data at the construction of the widget
     _buildReminderModalPickerData();
-    //load from DB
-    _task.startDate = DateTime.now();
-    _task.startDateTime = TimeOfDay.now();
+    _alarmOpacity = _task.hasAlarm ? 1.0 : 0.0;
+    if (_task.startDateTime == null) _task.startDateTime = TimeOfDay.now();
+    var _now = DateTime.now();
+    _task.startDate = DateTime(_now.year, _now.month, _now.day,
+        _task.startDateTime.hour, _task.startDateTime.minute);
     _dateTextStyle = TextStyle(fontWeight: FontWeight.w100, fontSize: 13.0);
     _subtitleTextStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 15.0);
   }
@@ -78,9 +80,14 @@ class _ActivityWidget extends State<ActivityWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print(_task.reminder);
     // TODO: implement build
-    if (widget.onChanged != null) widget.onChanged(_task);
-    setState(() => _mainctx = context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Add Your Code here.
+      if (widget.onChanged != null) widget.onChanged(_task);
+    });
+
+    //setState(() => _mainctx = context);
     var hour = _task.timeForTask?.hour ?? 0;
     var minute = _task.timeForTask?.minute ?? 0;
     return ExpansionTile(
@@ -276,7 +283,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                               primaryColor: Colors.white,
                               accentColor: _hasColor(),
                               accentTextTheme: TextTheme(
-                                body1: TextStyle(
+                                bodyText2: TextStyle(
                                   color: _hasColor().computeLuminance() > 0.5
                                       ? Colors.black
                                       : Colors.white,
@@ -327,7 +334,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                               primaryColor: Colors.white,
                               accentColor: _hasColor(),
                               accentTextTheme: TextTheme(
-                                body1: TextStyle(
+                                bodyText2: TextStyle(
                                   color: _hasColor().computeLuminance() > 0.5
                                       ? Colors.black
                                       : Colors.white,
@@ -597,7 +604,7 @@ class _ActivityWidget extends State<ActivityWidget> {
                                     ? IconButton(
                                         color: _task.reminder != null
                                             ? _hasColor()
-                                            : Theme.of(_mainctx).accentColor,
+                                            : Theme.of(context).accentColor,
                                         icon: Icon(Icons.add),
                                         onPressed: () => _showReminderModal(
                                             context,
@@ -705,10 +712,16 @@ class _ActivityWidget extends State<ActivityWidget> {
       ),
     );
 
+    if (_time == null) return;
+
     setState(() {
-      _task.dueDate = DateTime.now();
+      var _now = DateTime.now();
+
       _task.dueDateTime = _time;
+      _task.dueDate =
+          DateTime(_now.year, _now.month, _now.day, _time.hour, _time.minute);
       _task.timeForTask = _substractTOD(_task.dueDateTime, _task.startDateTime);
+      StateContainer.of(context).lastTaskEndTime = _time;
     });
   }
 
@@ -721,6 +734,9 @@ class _ActivityWidget extends State<ActivityWidget> {
       if (_total >= 60) {
         _hour = (_total / 60).floor();
         _minute = _total - 60 * _hour;
+      } else {
+        _hour = 0;
+        _minute = _total;
       }
       return TimeOfDay(hour: _hour, minute: _minute);
     } else if (end.period.index < start.period.index) {
@@ -734,6 +750,9 @@ class _ActivityWidget extends State<ActivityWidget> {
       if (_total >= 60) {
         _hour = (_total / 60).floor();
         _minute = _total - 60 * _hour;
+      } else {
+        _hour = 0;
+        _minute = _total;
       }
       return TimeOfDay(hour: _hour, minute: _minute);
     } else {
@@ -780,11 +799,19 @@ class _ActivityWidget extends State<ActivityWidget> {
         child: child,
       ),
     );
-
+    if (_time == null) return;
     setState(() {
-      _task.startDate = DateTime.now();
+      var _now = DateTime.now();
+
       _task.startDateTime = _time;
-      _task.dueDateTime = _task.timeForTask = null;
+      _task.startDate =
+          DateTime(_now.year, _now.month, _now.day, _time.hour, _time.minute);
+      _task.dueDateTime =
+          _task.timeForTask = StateContainer.of(context).lastTaskEndTime = null;
+      _task.hasDailyReminder = false;
+      _task.reminder = null;
+      _task.hasAlarm = false;
+      _alarmOpacity = 0.0;
     });
   }
 
